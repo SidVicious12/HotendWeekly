@@ -3,6 +3,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import { getLatestArticles } from '@/data/articles'
 
@@ -45,11 +46,14 @@ export default function HomePage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex-shrink-0 flex items-center space-x-3">
               <Link href="/" className="flex items-center">
-                <img 
-                  src="/branding/hotendweekly-logo.svg" 
-                  alt="HotendWeekly" 
-                  className="h-6 md:h-8 w-auto"
-                />
+                <div className="flex items-center space-x-2">
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-black rounded flex items-center justify-center">
+                    <div className="w-4 h-4 md:w-6 md:h-6 bg-white rounded-sm"></div>
+                  </div>
+                  <span className="text-lg md:text-xl font-light tracking-wider text-black uppercase">
+                    HotendWeekly
+                  </span>
+                </div>
               </Link>
             </div>
             <div className="hidden md:block">
@@ -170,7 +174,7 @@ export default function HomePage() {
                     <h3 className="text-black text-base font-light tracking-wide leading-tight group-hover:text-gray-600 transition-colors">
                       {article.title}
                     </h3>
-                    <p className="text-gray-600 text-sm font-light leading-relaxed line-clamp-2">
+                    <p className="text-gray-600 text-sm font-light leading-relaxed">
                       {article.excerpt}
                     </p>
                     <div className="flex items-center justify-between pt-2">

@@ -23,11 +23,14 @@ export default function NewsletterPage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex-shrink-0 flex items-center space-x-3">
               <Link href="/" className="flex items-center">
-                <img 
-                  src="/branding/hotendweekly-logo.svg" 
-                  alt="HotendWeekly" 
-                  className="h-6 md:h-8 w-auto"
-                />
+                <div className="flex items-center space-x-2">
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-black rounded flex items-center justify-center">
+                    <div className="w-4 h-4 md:w-6 md:h-6 bg-white rounded-sm"></div>
+                  </div>
+                  <span className="text-lg md:text-xl font-light tracking-wider text-black uppercase">
+                    HotendWeekly
+                  </span>
+                </div>
               </Link>
             </div>
             <div className="hidden md:block">
