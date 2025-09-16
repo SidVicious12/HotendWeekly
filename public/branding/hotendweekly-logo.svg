@@ -1,0 +1,5 @@
+<svg width="180" height="32" viewBox="0 0 180 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="8" width="24" height="16" rx="3" fill="currentColor" opacity="0.8"/>
+  <rect x="6" y="12" width="12" height="8" rx="2" fill="white"/>
+  <text x="32" y="22" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="300" letter-spacing="0.05em" fill="currentColor">HOTENDWEEKLY</text>
+</svg>

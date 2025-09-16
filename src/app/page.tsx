@@ -2,45 +2,79 @@
 
 'use client'
 
-import SearchInterface from '@/components/SearchInterface'
-import NewsletterSignup from '@/components/NewsletterSignup'
+import Link from 'next/link'
 import { useState } from 'react'
+import { getLatestArticles } from '@/data/articles'
+
+const featuredContent = [
+  {
+    id: '1',
+    title: 'BAMBU LAB DELAYS FLAGSHIP TO Q1 2025',
+    category: 'EDITORIAL',
+    date: 'Dec 16',
+    type: 'article',
+    href: '/blog/bambu-lab-flagship-delay-2025'
+  },
+  {
+    id: '2', 
+    title: 'AI-POWERED PRINT DISCOVERY',
+    category: 'COMING SOON',
+    date: 'Phase 1',
+    type: 'feature',
+    href: '#search'
+  },
+  {
+    id: '3',
+    title: 'ON-DEMAND PRINT FULFILLMENT', 
+    category: 'COMING SOON',
+    date: 'Phase 2',
+    type: 'feature',
+    href: '#fulfillment'
+  }
+]
 
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const latestArticles = getLatestArticles(3)
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="border-b border-gray-800 bg-gray-950/90 backdrop-blur-sm sticky top-0 z-50">
+      <nav className="border-b border-gray-200 bg-white sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-white">HotendWeekly</h1>
+            <div className="flex-shrink-0 flex items-center space-x-3">
+              <Link href="/" className="flex items-center">
+                <img 
+                  src="/branding/hotendweekly-logo.svg" 
+                  alt="HotendWeekly" 
+                  className="h-6 md:h-8 w-auto"
+                />
+              </Link>
             </div>
             <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
-                <a href="#search" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                  AI Search
-                </a>
-                <a href="#trending" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                  Trending
-                </a>
-                <a href="#newsletter" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <div className="flex items-center space-x-8">
+                <Link href="/editorial" className="text-black text-sm font-light uppercase tracking-wider hover:text-gray-600 transition-colors">
+                  Editorial
+                </Link>
+                <Link href="/discover" className="text-black text-sm font-light uppercase tracking-wider hover:text-gray-600 transition-colors">
+                  Discover
+                </Link>
+                <Link href="/tools" className="text-black text-sm font-light uppercase tracking-wider hover:text-gray-600 transition-colors">
+                  Tools
+                </Link>
+                <Link href="/newsletter" className="text-black text-sm font-light uppercase tracking-wider hover:text-gray-600 transition-colors">
                   Newsletter
-                </a>
+                </Link>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <button className="hidden sm:block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                Get Started
-              </button>
+            <div className="flex items-center">
               <button 
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
+                className="md:hidden p-2 text-black hover:text-gray-600 transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
             </div>
@@ -48,131 +82,246 @@ export default function HomePage() {
           
           {/* Mobile menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden border-t border-gray-800">
-              <div className="px-2 pt-2 pb-3 space-y-1">
-                <a href="#search" className="block text-gray-300 hover:text-white px-3 py-2 rounded-md text-base font-medium">
-                  AI Search
-                </a>
-                <a href="#trending" className="block text-gray-300 hover:text-white px-3 py-2 rounded-md text-base font-medium">
-                  Trending
-                </a>
-                <a href="#newsletter" className="block text-gray-300 hover:text-white px-3 py-2 rounded-md text-base font-medium">
+            <div className="md:hidden border-t border-gray-200 bg-white">
+              <div className="px-4 pt-4 pb-4 space-y-3">
+                <Link href="/editorial" className="block text-black text-sm font-light uppercase tracking-wider">
+                  Editorial
+                </Link>
+                <Link href="/discover" className="block text-black text-sm font-light uppercase tracking-wider">
+                  Discover
+                </Link>
+                <Link href="/tools" className="block text-black text-sm font-light uppercase tracking-wider">
+                  Tools
+                </Link>
+                <Link href="/newsletter" className="block text-black text-sm font-light uppercase tracking-wider">
                   Newsletter
-                </a>
-                <button className="w-full text-left bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-base font-medium transition-colors">
-                  Get Started
-                </button>
+                </Link>
               </div>
             </div>
           )}
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <main className="relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center lg:pt-32">
-          <h1 className="mx-auto max-w-4xl font-display text-5xl font-medium tracking-tight text-slate-100 sm:text-7xl">
-            Turn{' '}
-            <span className="relative whitespace-nowrap text-blue-400">
-              ideas into prints
-            </span>{' '}
-            in minutes
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        
+        {/* Hero Section */}
+        <section className="text-center mb-24">
+          <h1 className="text-4xl md:text-5xl font-light tracking-wide text-black leading-tight mb-8 uppercase">
+            AI-Powered 3D Print Discovery
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg tracking-tight text-slate-300">
-            Discover trending 3D models with AI-powered search. From concept to your doorstep.
+          <p className="text-lg text-gray-600 font-light leading-relaxed max-w-3xl mx-auto mb-12">
+            More than a newsletter. An intelligent discovery engine for 3D printable content, 
+            evolving into a complete maker platform with on-demand fulfillment.
           </p>
-          <div className="mt-10 flex justify-center gap-x-6">
-            <button className="group inline-flex items-center justify-center rounded-full py-4 px-8 text-sm font-semibold focus:outline-none bg-blue-600 text-white hover:bg-blue-500 active:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-              Find my first print
-            </button>
-            <button className="group inline-flex ring-1 items-center justify-center rounded-full py-4 px-8 text-sm focus:outline-none ring-slate-200 text-slate-200 hover:text-slate-100 hover:ring-slate-300 active:bg-slate-100 active:text-slate-600 focus-visible:outline-blue-600 focus-visible:ring-slate-300">
-              <svg className="h-3 w-3 flex-none fill-blue-300 group-active:fill-current" viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm7-3.25v2.992l2.69.348a.75.75 0 0 1-.138 1.49l-3.25-.42a.75.75 0 0 1-.652-.732V4.75a.75.75 0 0 1 1.5 0Z"/>
-              </svg>
-              <span className="ml-3">Watch demo</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Features Grid */}
-        <div className="py-24 sm:py-32">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mx-auto max-w-2xl lg:text-center">
-              <h2 className="text-base font-semibold leading-7 text-blue-400">Smart Discovery</h2>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                AI-powered 3D printing discovery
-              </p>
-              <p className="mt-6 text-lg leading-8 text-gray-300">
-                Our intelligent platform connects you with the perfect 3D models and printing services.
-              </p>
-            </div>
-            <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-              <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-                <div className="flex flex-col">
-                  <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-white">
-                    <div className="h-5 w-5 flex-none bg-blue-400 rounded-full" />
-                    AI Search
-                  </dt>
-                  <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-300">
-                    <p className="flex-auto">Natural language search for 3D models. Just describe what you need.</p>
-                  </dd>
-                </div>
-                <div className="flex flex-col">
-                  <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-white">
-                    <div className="h-5 w-5 flex-none bg-blue-400 rounded-full" />
-                    Instant Printing
-                  </dt>
-                  <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-300">
-                    <p className="flex-auto">Connect to local and online print services for immediate fulfillment.</p>
-                  </dd>
-                </div>
-                <div className="flex flex-col">
-                  <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-white">
-                    <div className="h-5 w-5 flex-none bg-blue-400 rounded-full" />
-                    Weekly Curation
-                  </dt>
-                  <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-300">
-                    <p className="flex-auto">Handpicked trending models delivered to your inbox every week.</p>
-                  </dd>
-                </div>
-              </dl>
+          
+          {/* Search Preview */}
+          <div id="discover" className="max-w-2xl mx-auto mb-16">
+            <div className="border border-gray-300 rounded-none p-6 bg-gray-50">
+              <div className="text-xs font-light tracking-wider text-black uppercase mb-4">
+                AI Search - Coming Phase 1
+              </div>
+              <input
+                type="text"
+                placeholder="Describe what you want to print..."
+                className="w-full px-4 py-3 border border-gray-300 text-sm font-light placeholder-gray-400 focus:outline-none focus:border-black transition-colors disabled:bg-gray-100"
+                disabled
+              />
+              <Link 
+                href="/discover"
+                className="block w-full mt-4 px-6 py-3 bg-black text-white text-sm font-light uppercase tracking-wider hover:bg-gray-800 transition-colors text-center"
+              >
+                Discover Prints
+              </Link>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* CTA Section */}
-        <div className="bg-gray-900 py-16 sm:py-24">
-          <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div className="relative isolate overflow-hidden bg-gray-800 px-6 pt-16 shadow-2xl sm:rounded-3xl sm:px-16 md:pt-24 lg:flex lg:gap-x-20 lg:px-24 lg:pt-0">
-              <div className="mx-auto max-w-md text-center lg:mx-0 lg:flex-auto lg:py-32 lg:text-left">
-                <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                  Start discovering amazing prints today
-                </h2>
-                <p className="mt-6 text-lg leading-8 text-gray-300">
-                  Join thousands of makers finding their next favorite 3D print.
+        {/* Latest from Editorial */}
+        <section className="mb-24">
+          <div className="flex items-center justify-between mb-12">
+            <h2 className="text-2xl font-light tracking-wide text-black uppercase">
+              Latest from Editorial
+            </h2>
+            <Link 
+              href="/editorial" 
+              className="text-sm font-light uppercase tracking-wider text-black hover:text-gray-600 transition-colors"
+            >
+              View all →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {latestArticles.map((article, index) => (
+              <article key={article.slug} className="group cursor-pointer">
+                <Link href={`/editorial/${article.slug}`}>
+                  <div className="aspect-[4/5] bg-gray-100 mb-4 overflow-hidden">
+                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                      <div className="text-gray-400 text-4xl font-thin">
+                        {index === 0 ? 'AI' : index === 1 ? '3D' : 'MAT'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-light tracking-wider text-black uppercase">
+                        Editorial
+                      </span>
+                    </div>
+                    <h3 className="text-black text-base font-light tracking-wide leading-tight group-hover:text-gray-600 transition-colors">
+                      {article.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm font-light leading-relaxed line-clamp-2">
+                      {article.excerpt}
+                    </p>
+                    <div className="flex items-center justify-between pt-2">
+                      <span className="text-xs text-gray-500 font-light">
+                        {article.author} | {new Date(article.date).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* Featured Content Grid */}
+        <section className="mb-24">
+          <h2 className="text-2xl font-light tracking-wide text-black uppercase mb-12 text-center">
+            Platform Features
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {featuredContent.map((item, index) => (
+              <article key={item.id} className="group cursor-pointer">
+                <Link href={item.href}>
+                  <div className="aspect-[4/5] bg-gray-100 mb-4 overflow-hidden">
+                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                      <div className="text-gray-400 text-4xl font-thin">
+                        {item.type === 'article' ? '📝' : item.type === 'feature' ? '🔧' : '🎯'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-xs font-light tracking-wider uppercase ${
+                        item.category === 'COMING SOON' ? 'text-gray-400' : 'text-black'
+                      }`}>
+                        {item.category}
+                      </span>
+                    </div>
+                    <h3 className={`text-base font-light tracking-wide leading-tight transition-colors ${
+                      item.category === 'COMING SOON' 
+                        ? 'text-gray-500' 
+                        : 'text-black group-hover:text-gray-600'
+                    }`}>
+                      {item.title}
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 font-light">
+                        {item.type === 'article' ? 'Editorial' : 'Platform'} | {item.date}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* Tools Section */}
+        <section id="tools" className="mb-24 py-16 border-t border-gray-200">
+          <div className="text-center">
+            <h2 className="text-2xl font-light tracking-wide text-black uppercase mb-8">
+              Maker Tools
+            </h2>
+            <p className="text-gray-600 font-light leading-relaxed max-w-2xl mx-auto mb-12">
+              Evolving platform for 3D printing discovery, curation, and fulfillment.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <div className="bg-gray-50 p-8 text-left">
+                <h3 className="text-lg font-light tracking-wide text-black uppercase mb-4">
+                  Discovery Engine
+                </h3>
+                <p className="text-gray-600 font-light leading-relaxed mb-4">
+                  AI-powered search for trending, useful, and fun 3D prints via natural language prompts.
                 </p>
-                <div className="mt-10 flex items-center justify-center gap-x-6 lg:justify-start">
-                  <button className="rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-                    Get started for free
-                  </button>
+                <div className="text-xs text-gray-500 font-light uppercase tracking-wider">
+                  Phase 1 - Development
                 </div>
               </div>
-              <div className="relative mt-16 h-80 lg:mt-8">
-                <div className="absolute left-0 top-0 w-[57rem] max-w-none rounded-md bg-gray-700 ring-1 ring-white/10"></div>
+              
+              <div className="bg-gray-50 p-8 text-left">
+                <h3 className="text-lg font-light tracking-wide text-black uppercase mb-4">
+                  Print Fulfillment
+                </h3>
+                <p className="text-gray-600 font-light leading-relaxed mb-4">
+                  On-demand printing network connecting designs to local and online print services.
+                </p>
+                <div className="text-xs text-gray-500 font-light uppercase tracking-wider">
+                  Phase 2 - Planned
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Search Interface */}
-        <section id="search">
-          <SearchInterface />
         </section>
 
-        {/* Newsletter Signup */}
-        <section id="newsletter">
-          <NewsletterSignup />
+        {/* Newsletter Section */}
+        <section id="newsletter" className="mt-24 py-16 border-t border-gray-200">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-2xl font-light tracking-wide text-black mb-6 uppercase">
+              Weekly Curation
+            </h2>
+            <p className="text-gray-600 font-light leading-relaxed mb-8">
+              Handpicked 3D printing discoveries, industry insights, and maker stories. 
+              Be first to know about new tools, materials, and platform features.
+            </p>
+            <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto" id="newsletter-form">
+              <input
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                className="flex-1 px-4 py-3 border border-gray-300 text-sm font-light placeholder-gray-400 focus:outline-none focus:border-black transition-colors"
+                required
+              />
+              <button
+                type="submit"
+                className="px-6 py-3 bg-black text-white text-sm font-light uppercase tracking-wider hover:bg-gray-800 transition-colors"
+              >
+                Subscribe
+              </button>
+            </form>
+            <p className="text-xs text-gray-500 font-light mt-4">
+              Integration with Buttondown/ConvertKit coming soon
+            </p>
+          </div>
         </section>
+
+        {/* Footer */}
+        <footer className="mt-24 py-8 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row justify-between items-center">
+            <div className="text-xs text-gray-500 font-light uppercase tracking-wider mb-4 sm:mb-0">
+              © 2024 HotendWeekly
+            </div>
+            <div className="flex space-x-6">
+              <Link href="/editorial" className="text-xs text-gray-500 font-light uppercase tracking-wider hover:text-black transition-colors">
+                Editorial
+              </Link>
+              <Link href="/discover" className="text-xs text-gray-500 font-light uppercase tracking-wider hover:text-black transition-colors">
+                Discover
+              </Link>
+              <Link href="/tools" className="text-xs text-gray-500 font-light uppercase tracking-wider hover:text-black transition-colors">
+                Tools
+              </Link>
+              <Link href="/newsletter" className="text-xs text-gray-500 font-light uppercase tracking-wider hover:text-black transition-colors">
+                Newsletter
+              </Link>
+            </div>
+          </div>
+        </footer>
       </main>
     </div>
   );

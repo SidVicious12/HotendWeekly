@@ -13,112 +13,93 @@ interface SearchResult {
 
 export default function SearchInterface() {
   const [query, setQuery] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [results, setResults] = useState<SearchResult[]>([])
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!query.trim()) return
-
-    setIsLoading(true)
-    
-    // Simulate API call - replace with actual API
-    setTimeout(() => {
-      const mockResults: SearchResult[] = [
-        {
-          id: '1',
-          title: 'Phone Stand with Cable Management',
-          description: 'Modern phone stand with built-in cable routing',
-          thumbnail: '/api/placeholder/300/200',
-          downloadUrl: '#',
-          tags: ['phone', 'stand', 'cable', 'desk']
-        },
-        {
-          id: '2', 
-          title: 'Adjustable Desktop Organizer',
-          description: 'Modular desktop organizer with customizable compartments',
-          thumbnail: '/api/placeholder/300/200',
-          downloadUrl: '#',
-          tags: ['organizer', 'desk', 'modular']
-        }
-      ]
-      setResults(mockResults)
-      setIsLoading(false)
-    }, 1500)
+    // TODO: Phase 1 - Integrate with OpenAI GPT-4 API
+    // TODO: Phase 1 - Connect to Supabase for STL metadata
+    // TODO: Phase 2 - Add Stripe integration for print fulfillment
+    console.log('Search query:', query)
   }
 
   return (
-    <div className="bg-gray-950 py-16">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Find Your Perfect 3D Print
+    <div className="bg-white border-t border-gray-200 py-16 sm:py-24">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-2xl font-light tracking-wide text-black uppercase mb-6">
+            AI Print Discovery
           </h2>
-          <p className="text-gray-300 text-lg">
-            Describe what you're looking for and let AI find the best models
+          <p className="text-gray-600 font-light leading-relaxed mb-12">
+            Natural language search for 3D printable content. Describe what you need and discover curated models with AI-powered recommendations.
           </p>
         </div>
-
-        <form onSubmit={handleSearch} className="mb-8">
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="e.g., phone stand with cable management, miniature dragon, cookie cutter..."
-              className="flex-1 px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <button
-              type="submit"
-              disabled={isLoading || !query.trim()}
-              className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 text-white rounded-lg font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-950"
-            >
-              {isLoading ? 'Searching...' : 'Search'}
-            </button>
-          </div>
-        </form>
-
-        {isLoading && (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          </div>
-        )}
-
-        {results.length > 0 && !isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {results.map((result) => (
-              <div key={result.id} className="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors">
-                <div className="h-48 bg-gray-700"></div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-white mb-2">
-                    {result.title}
-                  </h3>
-                  <p className="text-gray-300 mb-4">
-                    {result.description}
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {result.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-1 bg-gray-700 text-gray-300 text-sm rounded"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex gap-3">
-                    <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded font-semibold transition-colors">
-                      Download STL
-                    </button>
-                    <button className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded font-semibold transition-colors">
-                      Get This Printed
-                    </button>
-                  </div>
-                </div>
+        <div className="mx-auto max-w-2xl">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="border border-gray-300 p-6 bg-gray-50">
+              <label htmlFor="search" className="block text-xs font-light tracking-wider text-black uppercase mb-4">
+                Search Query
+              </label>
+              <input
+                id="search"
+                name="search"
+                type="text"
+                placeholder="Describe what you want to print..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 text-sm font-light placeholder-gray-400 focus:outline-none focus:border-black transition-colors"
+                disabled
+              />
+              <button
+                type="submit"
+                className="w-full mt-4 px-6 py-3 bg-gray-300 text-gray-500 text-sm font-light uppercase tracking-wider cursor-not-allowed"
+                disabled
+              >
+                Discover Prints - Coming Phase 1
+              </button>
+            </div>
+          </form>
+          
+          {/* Preview of future functionality */}
+          <div className="mt-8 text-center">
+            <p className="text-xs text-gray-500 font-light uppercase tracking-wider mb-4">
+              Planned Integration
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+              <div className="bg-gray-50 p-4">
+                <h4 className="text-sm font-light text-black uppercase tracking-wide mb-2">
+                  OpenAI GPT-4 Turbo
+                </h4>
+                <p className="text-xs text-gray-600 font-light">
+                  Natural language processing for intelligent model recommendations and search result curation
+                </p>
               </div>
-            ))}
+              <div className="bg-gray-50 p-4">
+                <h4 className="text-sm font-light text-black uppercase tracking-wide mb-2">
+                  Supabase + Postgres
+                </h4>
+                <p className="text-xs text-gray-600 font-light">
+                  STL metadata storage, user preferences, and search result caching for optimal performance
+                </p>
+              </div>
+              <div className="bg-gray-50 p-4">
+                <h4 className="text-sm font-light text-black uppercase tracking-wide mb-2">
+                  Print Service APIs
+                </h4>
+                <p className="text-xs text-gray-600 font-light">
+                  Direct integration with Craftcloud, Hubs, and local maker networks for instant fulfillment
+                </p>
+              </div>
+              <div className="bg-gray-50 p-4">
+                <h4 className="text-sm font-light text-black uppercase tracking-wide mb-2">
+                  Stripe Payments
+                </h4>
+                <p className="text-xs text-gray-600 font-light">
+                  Secure payment processing for STL purchases and print-on-demand services
+                </p>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )
