@@ -1,0 +1,44 @@
+[
+  {
+    "id": "transparent",
+    "name": "Transparent",
+    "description": "No background (PNG)",
+    "color": "transparent",
+    "gradient": null
+  },
+  {
+    "id": "white",
+    "name": "Studio White",
+    "description": "Clean white background",
+    "color": "#ffffff",
+    "gradient": null
+  },
+  {
+    "id": "gray",
+    "name": "Studio Gray",
+    "description": "Neutral gray backdrop",
+    "color": "#f3f4f6",
+    "gradient": "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)"
+  },
+  {
+    "id": "wood",
+    "name": "Wood Desk",
+    "description": "Natural wood texture",
+    "color": "#d4a574",
+    "gradient": "linear-gradient(135deg, #d4a574 0%, #b8956a 100%)"
+  },
+  {
+    "id": "gradient-purple",
+    "name": "Modern Purple",
+    "description": "Trendy purple gradient",
+    "color": "#9333ea",
+    "gradient": "linear-gradient(135deg, #9333ea 0%, #ec4899 100%)"
+  },
+  {
+    "id": "gradient-blue",
+    "name": "Cool Blue",
+    "description": "Professional blue gradient",
+    "color": "#3b82f6",
+    "gradient": "linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)"
+  }
+]

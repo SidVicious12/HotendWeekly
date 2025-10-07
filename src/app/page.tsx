@@ -1,16 +1,29 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+
+interface Background {
+  id: string
+  name: string
+  description: string
+  color: string
+  gradient: string | null
+}
 
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('miniatures')
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
+  const [removedBgImage, setRemovedBgImage] = useState<string | null>(null)
   const [processedImage, setProcessedImage] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [showEmailModal, setShowEmailModal] = useState(false)
   const [email, setEmail] = useState('')
   const [emailSubmitted, setEmailSubmitted] = useState(false)
+  const [selectedBackground, setSelectedBackground] = useState<string>('white')
+  const [processingStatus, setProcessingStatus] = useState<string>('')
+  const [error, setError] = useState<string | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const categories = [
     { id: 'miniatures', label: 'Miniatures' },
@@ -19,25 +32,185 @@ export default function HomePage() {
     { id: 'accessories', label: 'Accessories' }
   ]
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const imageData = e.target?.result as string
-        setUploadedImage(imageData)
-        setProcessedImage(null)
+  const backgrounds: Background[] = [
+    {
+      id: 'transparent',
+      name: 'Transparent',
+      description: 'No background',
+      color: 'transparent',
+      gradient: null
+    },
+    {
+      id: 'white',
+      name: 'Studio White',
+      description: 'Clean white',
+      color: '#ffffff',
+      gradient: null
+    },
+    {
+      id: 'gray',
+      name: 'Studio Gray',
+      description: 'Neutral gray',
+      color: '#f3f4f6',
+      gradient: 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)'
+    },
+    {
+      id: 'wood',
+      name: 'Wood Desk',
+      description: 'Natural wood',
+      color: '#d4a574',
+      gradient: 'linear-gradient(135deg, #d4a574 0%, #b8956a 100%)'
+    },
+    {
+      id: 'gradient-purple',
+      name: 'Modern Purple',
+      description: 'Trendy purple',
+      color: '#9333ea',
+      gradient: 'linear-gradient(135deg, #9333ea 0%, #ec4899 100%)'
+    },
+    {
+      id: 'gradient-blue',
+      name: 'Cool Blue',
+      description: 'Professional',
+      color: '#3b82f6',
+      gradient: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)'
+    }
+  ]
 
-        // Simulate AI processing
-        setIsProcessing(true)
-        setTimeout(() => {
-          setProcessedImage(imageData) // For now, just use the same image
-          setIsProcessing(false)
-        }, 2500) // 2.5 second processing animation
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setError(null)
+    setIsProcessing(true)
+    setProcessingStatus('Uploading image...')
+
+    // Show original image
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      setUploadedImage(e.target?.result as string)
+    }
+    reader.readAsDataURL(file)
+
+    try {
+      // Call our API to remove background
+      setProcessingStatus('Removing background with AI...')
+      const formData = new FormData()
+      formData.append('image', file)
+
+      const response = await fetch('/api/remove-bg', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to process image')
       }
-      reader.readAsDataURL(file)
+
+      if (data.simulated) {
+        // Fallback to simulated processing if no API key
+        setProcessingStatus('Processing (simulated mode)...')
+        const imageData = await new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onload = (e) => resolve(e.target?.result as string)
+          reader.readAsDataURL(file)
+        })
+
+        setTimeout(() => {
+          setRemovedBgImage(imageData)
+          setProcessedImage(imageData)
+          setIsProcessing(false)
+          setProcessingStatus('')
+        }, 2000)
+      } else {
+        // Real API result
+        setProcessingStatus('Applying background...')
+        setRemovedBgImage(data.image)
+
+        // Composite with selected background
+        await compositeImage(data.image, selectedBackground)
+        setIsProcessing(false)
+        setProcessingStatus('')
+      }
+
+    } catch (err) {
+      console.error('Processing error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to process image')
+      setIsProcessing(false)
+      setProcessingStatus('')
     }
   }
+
+  const compositeImage = async (bgRemovedImage: string, backgroundId: string) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+
+    await new Promise((resolve, reject) => {
+      img.onload = resolve
+      img.onerror = reject
+      img.src = bgRemovedImage
+    })
+
+    // Set canvas size to image size
+    canvas.width = img.width
+    canvas.height = img.height
+
+    // Draw background
+    const bg = backgrounds.find(b => b.id === backgroundId)
+    if (bg) {
+      if (bg.gradient) {
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
+        // Simple gradient parsing (for demo)
+        if (bg.id === 'gray') {
+          gradient.addColorStop(0, '#f3f4f6')
+          gradient.addColorStop(1, '#e5e7eb')
+        } else if (bg.id === 'wood') {
+          gradient.addColorStop(0, '#d4a574')
+          gradient.addColorStop(1, '#b8956a')
+        } else if (bg.id === 'gradient-purple') {
+          gradient.addColorStop(0, '#9333ea')
+          gradient.addColorStop(1, '#ec4899')
+        } else if (bg.id === 'gradient-blue') {
+          gradient.addColorStop(0, '#3b82f6')
+          gradient.addColorStop(1, '#06b6d4')
+        }
+        ctx.fillStyle = gradient
+      } else if (bg.color !== 'transparent') {
+        ctx.fillStyle = bg.color
+      }
+
+      if (bg.color !== 'transparent') {
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+      }
+    }
+
+    // Draw image on top
+    ctx.drawImage(img, 0, 0)
+
+    // Add watermark
+    ctx.font = 'bold 24px Arial'
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)'
+    ctx.fillText('HotendWeekly', canvas.width - 200, canvas.height - 20)
+
+    // Convert to data URL
+    const finalImage = canvas.toDataURL('image/png')
+    setProcessedImage(finalImage)
+  }
+
+  // Re-composite when background changes
+  useEffect(() => {
+    if (removedBgImage) {
+      compositeImage(removedBgImage, selectedBackground)
+    }
+  }, [selectedBackground, removedBgImage])
 
   const handleDownload = () => {
     if (processedImage) {
@@ -52,7 +225,6 @@ export default function HomePage() {
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // For now, just show success message (later: connect to email service)
     setEmailSubmitted(true)
     setTimeout(() => {
       setShowEmailModal(false)
@@ -67,11 +239,13 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+      {/* Hidden canvas for image compositing */}
+      <canvas ref={canvasRef} className="hidden" />
+
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo */}
             <Link href="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">H</span>
@@ -79,7 +253,6 @@ export default function HomePage() {
               <span className="text-xl font-semibold text-gray-900">HotendWeekly</span>
             </Link>
 
-            {/* Nav Links */}
             <div className="hidden md:flex items-center space-x-8">
               <button className="text-gray-700 hover:text-gray-900 text-sm font-medium flex items-center">
                 Tools
@@ -101,7 +274,6 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Auth Buttons */}
             <div className="flex items-center space-x-4">
               <button className="hidden md:inline-flex text-gray-700 hover:text-gray-900 text-sm font-medium">
                 🌐 English
@@ -132,7 +304,6 @@ export default function HomePage() {
             eye-converting product visuals that can boost your conversions by up to 20%.
           </p>
 
-          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
               onClick={handleCTAClick}
@@ -183,6 +354,15 @@ export default function HomePage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload your product</h2>
             <p className="text-gray-600 mb-6">One image is all it takes.</p>
 
+            {error && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600">{error}</p>
+                <p className="text-xs text-red-500 mt-1">
+                  Tip: Add your Remove.bg API key to .env.local for real processing
+                </p>
+              </div>
+            )}
+
             <div className="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-purple-400 transition-colors cursor-pointer">
               <input
                 type="file"
@@ -190,12 +370,15 @@ export default function HomePage() {
                 onChange={handleImageUpload}
                 className="hidden"
                 id="file-upload"
+                disabled={isProcessing}
               />
               <label htmlFor="file-upload" className="cursor-pointer">
                 {uploadedImage ? (
                   <div className="space-y-4">
                     <img src={uploadedImage} alt="Uploaded product" className="max-h-64 mx-auto rounded-lg" />
-                    <p className="text-sm text-gray-500">Click to change image</p>
+                    <p className="text-sm text-gray-500">
+                      {isProcessing ? 'Processing...' : 'Click to change image'}
+                    </p>
                   </div>
                 ) : (
                   <>
@@ -210,13 +393,43 @@ export default function HomePage() {
                 )}
               </label>
             </div>
+
+            {/* Background Selection */}
+            {removedBgImage && !isProcessing && (
+              <div className="mt-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Choose Background</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {backgrounds.map((bg) => (
+                    <button
+                      key={bg.id}
+                      onClick={() => setSelectedBackground(bg.id)}
+                      className={`relative p-3 rounded-lg border-2 transition-all ${
+                        selectedBackground === bg.id
+                          ? 'border-purple-600 shadow-lg'
+                          : 'border-gray-200 hover:border-purple-300'
+                      }`}
+                    >
+                      <div
+                        className="w-full h-16 rounded mb-2"
+                        style={{
+                          background: bg.gradient || bg.color,
+                          border: bg.color === 'transparent' ? '1px dashed #ccc' : 'none'
+                        }}
+                      />
+                      <p className="text-xs font-medium text-gray-900">{bg.name}</p>
+                      <p className="text-xs text-gray-500">{bg.description}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Create & Share Section */}
           <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-3xl p-8 shadow-xl text-white">
             <h2 className="text-2xl font-bold mb-2">Create & Share</h2>
             <p className="text-purple-100 mb-6">
-              Get eye-catching photos and videos in minutes, and it's ready for any platform!
+              Get eye-catching photos ready for any platform!
             </p>
 
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6 relative">
@@ -224,21 +437,17 @@ export default function HomePage() {
                 {isProcessing && (
                   <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
-                    <p className="text-white font-medium">Processing with AI...</p>
-                    <p className="text-white/70 text-sm mt-2">Enhancing your product image</p>
+                    <p className="text-white font-medium">{processingStatus}</p>
                   </div>
                 )}
                 {processedImage ? (
                   <img
                     src={processedImage}
                     alt="Processed"
-                    className="max-h-full rounded-lg"
-                    style={{
-                      filter: 'brightness(1.1) contrast(1.05) saturate(1.1)',
-                    }}
+                    className="max-h-full rounded-lg object-contain"
                   />
                 ) : uploadedImage && !isProcessing ? (
-                  <img src={uploadedImage} alt="Preview" className="max-h-full rounded-lg" />
+                  <img src={uploadedImage} alt="Preview" className="max-h-full rounded-lg object-contain" />
                 ) : (
                   <p className="text-gray-400">Upload an image to see preview</p>
                 )}
@@ -262,13 +471,13 @@ export default function HomePage() {
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span>AI-powered background replacement</span>
+                <span>AI-powered background removal</span>
               </div>
               <div className="flex items-center space-x-2 text-sm">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span>Professional lighting adjustments</span>
+                <span>6 professional backgrounds</span>
               </div>
               <div className="flex items-center space-x-2 text-sm">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
