@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Background {
   id: string
@@ -12,18 +14,28 @@ interface Background {
 }
 
 export default function HomePage() {
+  const router = useRouter()
+  const { user, loading, signOut } = useAuth()
   const [activeCategory, setActiveCategory] = useState('miniatures')
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [removedBgImage, setRemovedBgImage] = useState<string | null>(null)
   const [processedImage, setProcessedImage] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [showEmailModal, setShowEmailModal] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
   const [email, setEmail] = useState('')
   const [emailSubmitted, setEmailSubmitted] = useState(false)
   const [selectedBackground, setSelectedBackground] = useState<string>('white')
   const [processingStatus, setProcessingStatus] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth/login')
+    }
+  }, [user, loading, router])
 
   const categories = [
     { id: 'miniatures', label: 'Miniatures' },
@@ -254,6 +266,23 @@ export default function HomePage() {
     setShowEmailModal(true)
   }
 
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render if not authenticated (will redirect)
+  if (!user) {
+    return null
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
       {/* Hidden canvas for image compositing */}
@@ -292,15 +321,37 @@ export default function HomePage() {
             </div>
 
             <div className="flex items-center space-x-4">
-              <button className="hidden md:inline-flex text-gray-700 hover:text-gray-900 text-sm font-medium">
-                🌐 English
-              </button>
-              <button
-                onClick={handleCTAClick}
-                className="bg-black text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
-              >
-                LOG IN / SIGN UP
-              </button>
+              {user && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
+                  >
+                    <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm font-semibold">
+                        {user.email?.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  </button>
+
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                      <div className="px-4 py-2 border-b border-gray-200">
+                        <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          signOut()
+                          setShowUserMenu(false)
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -316,31 +367,14 @@ export default function HomePage() {
             </span>{' '}
             Sales Drivers
           </h1>
-          <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-600 mb-6 max-w-3xl mx-auto">
             Stop letting mediocre images hurt your sales. HotendWeekly uses AI to effortlessly create stunning,
             eye-converting product visuals that can boost your conversions by up to 20%.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button
-              onClick={handleCTAClick}
-              className="bg-black text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-800 transition-colors flex items-center"
-            >
-              Start Free Trial
-              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
-            <button
-              onClick={handleCTAClick}
-              className="bg-white text-gray-900 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-50 transition-colors border-2 border-gray-200 flex items-center"
-            >
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none">
-                <path d="M8 3H16M3 8H21M3 16H21M8 21H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              Try On Etsy
-            </button>
-          </div>
+          <p className="text-sm text-purple-600 font-semibold">
+            Welcome, {user.email}! Upload an image below to get started.
+          </p>
         </div>
 
         {/* Category Tabs */}
