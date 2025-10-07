@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'HotendWeekly - Discover Trending 3D Prints',
-  description: 'AI-powered 3D printing discovery and fulfillment platform',
+  title: 'HotendWeekly - Turn 3D Prints into Sales',
+  description: 'AI-powered product photography for 3D print sellers. Create professional listing photos in minutes.',
 }
 
 export default function RootLayout({
