@@ -93,23 +93,10 @@ export default function HomePage() {
     reader.readAsDataURL(file)
 
     try {
-      // Call our API to remove background
-      setProcessingStatus('Removing background with AI...')
-      const formData = new FormData()
-      formData.append('image', file)
+      // Get API key from env
+      const apiKey = process.env.NEXT_PUBLIC_REMOVEBG_API_KEY
 
-      const response = await fetch('/api/remove-bg', {
-        method: 'POST',
-        body: formData,
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to process image')
-      }
-
-      if (data.simulated) {
+      if (!apiKey || apiKey === 'your_api_key_here') {
         // Fallback to simulated processing if no API key
         setProcessingStatus('Processing (simulated mode)...')
         const imageData = await new Promise<string>((resolve) => {
@@ -124,16 +111,46 @@ export default function HomePage() {
           setIsProcessing(false)
           setProcessingStatus('')
         }, 2000)
-      } else {
-        // Real API result
-        setProcessingStatus('Applying background...')
-        setRemovedBgImage(data.image)
-
-        // Composite with selected background
-        await compositeImage(data.image, selectedBackground)
-        setIsProcessing(false)
-        setProcessingStatus('')
+        return
       }
+
+      // Call Remove.bg API directly from client
+      setProcessingStatus('Removing background with AI...')
+      const formData = new FormData()
+      formData.append('image_file', file)
+      formData.append('size', 'auto')
+
+      const response = await fetch('https://api.remove.bg/v1.0/removebg', {
+        method: 'POST',
+        headers: {
+          'X-Api-Key': apiKey,
+        },
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.errors?.[0]?.title || 'Failed to remove background')
+      }
+
+      // Get the processed image
+      const blob = await response.blob()
+      const imageUrl = URL.createObjectURL(blob)
+
+      // Convert blob to base64 for canvas processing
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.readAsDataURL(blob)
+      })
+
+      setProcessingStatus('Applying background...')
+      setRemovedBgImage(base64)
+
+      // Composite with selected background
+      await compositeImage(base64, selectedBackground)
+      setIsProcessing(false)
+      setProcessingStatus('')
 
     } catch (err) {
       console.error('Processing error:', err)
