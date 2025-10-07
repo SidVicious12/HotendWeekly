@@ -30,12 +30,12 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/login')
-    }
-  }, [user, loading, router])
+  // Authentication is optional for now (Hostinger compatibility)
+  // useEffect(() => {
+  //   if (!loading && !user) {
+  //     router.push('/auth/login')
+  //   }
+  // }, [user, loading, router])
 
   const categories = [
     { id: 'miniatures', label: 'Miniatures' },
@@ -266,22 +266,18 @@ export default function HomePage() {
     setShowEmailModal(true)
   }
 
-  // Show loading while checking authentication
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Don't render if not authenticated (will redirect)
-  if (!user) {
-    return null
-  }
+  // Optional: Show loading while checking authentication
+  // Disabled for Hostinger compatibility
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+  //         <p className="text-gray-600">Loading...</p>
+  //       </div>
+  //     </div>
+  //   )
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
@@ -372,9 +368,16 @@ export default function HomePage() {
             eye-converting product visuals that can boost your conversions by up to 20%.
           </p>
 
-          <p className="text-sm text-purple-600 font-semibold">
-            Welcome, {user.email}! Upload an image below to get started.
-          </p>
+          {user && (
+            <p className="text-sm text-purple-600 font-semibold">
+              Welcome, {user.email}! Upload an image below to get started.
+            </p>
+          )}
+          {!user && (
+            <p className="text-sm text-gray-600">
+              Upload an image below to get started with AI-powered background removal.
+            </p>
+          )}
         </div>
 
         {/* Category Tabs */}
