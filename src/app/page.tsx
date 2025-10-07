@@ -1,11 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('miniatures')
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
+  const [processedImage, setProcessedImage] = useState<string | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [showEmailModal, setShowEmailModal] = useState(false)
+  const [email, setEmail] = useState('')
+  const [emailSubmitted, setEmailSubmitted] = useState(false)
 
   const categories = [
     { id: 'miniatures', label: 'Miniatures' },
@@ -19,10 +24,45 @@ export default function HomePage() {
     if (file) {
       const reader = new FileReader()
       reader.onload = (e) => {
-        setUploadedImage(e.target?.result as string)
+        const imageData = e.target?.result as string
+        setUploadedImage(imageData)
+        setProcessedImage(null)
+
+        // Simulate AI processing
+        setIsProcessing(true)
+        setTimeout(() => {
+          setProcessedImage(imageData) // For now, just use the same image
+          setIsProcessing(false)
+        }, 2500) // 2.5 second processing animation
       }
       reader.readAsDataURL(file)
     }
+  }
+
+  const handleDownload = () => {
+    if (processedImage) {
+      const link = document.createElement('a')
+      link.href = processedImage
+      link.download = 'hotendweekly-enhanced-3dprint.png'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+  }
+
+  const handleEmailSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // For now, just show success message (later: connect to email service)
+    setEmailSubmitted(true)
+    setTimeout(() => {
+      setShowEmailModal(false)
+      setEmailSubmitted(false)
+      setEmail('')
+    }, 2000)
+  }
+
+  const handleCTAClick = () => {
+    setShowEmailModal(true)
   }
 
   return (
@@ -66,7 +106,10 @@ export default function HomePage() {
               <button className="hidden md:inline-flex text-gray-700 hover:text-gray-900 text-sm font-medium">
                 🌐 English
               </button>
-              <button className="bg-black text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors">
+              <button
+                onClick={handleCTAClick}
+                className="bg-black text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
+              >
                 LOG IN / SIGN UP
               </button>
             </div>
@@ -91,13 +134,19 @@ export default function HomePage() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button className="bg-black text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-800 transition-colors flex items-center">
+            <button
+              onClick={handleCTAClick}
+              className="bg-black text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-800 transition-colors flex items-center"
+            >
               Start Free Trial
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </button>
-            <button className="bg-white text-gray-900 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-50 transition-colors border-2 border-gray-200 flex items-center">
+            <button
+              onClick={handleCTAClick}
+              className="bg-white text-gray-900 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-50 transition-colors border-2 border-gray-200 flex items-center"
+            >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none">
                 <path d="M8 3H16M3 8H21M3 16H21M8 21H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
@@ -170,15 +219,43 @@ export default function HomePage() {
               Get eye-catching photos and videos in minutes, and it's ready for any platform!
             </p>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6">
-              <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg flex items-center justify-center">
-                {uploadedImage ? (
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6 relative">
+              <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg flex items-center justify-center relative overflow-hidden">
+                {isProcessing && (
+                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
+                    <p className="text-white font-medium">Processing with AI...</p>
+                    <p className="text-white/70 text-sm mt-2">Enhancing your product image</p>
+                  </div>
+                )}
+                {processedImage ? (
+                  <img
+                    src={processedImage}
+                    alt="Processed"
+                    className="max-h-full rounded-lg"
+                    style={{
+                      filter: 'brightness(1.1) contrast(1.05) saturate(1.1)',
+                    }}
+                  />
+                ) : uploadedImage && !isProcessing ? (
                   <img src={uploadedImage} alt="Preview" className="max-h-full rounded-lg" />
                 ) : (
                   <p className="text-gray-400">Upload an image to see preview</p>
                 )}
               </div>
             </div>
+
+            {processedImage && !isProcessing && (
+              <button
+                onClick={handleDownload}
+                className="w-full bg-white text-purple-600 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors mb-4 flex items-center justify-center"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download Enhanced Image
+              </button>
+            )}
 
             <div className="space-y-3">
               <div className="flex items-center space-x-2 text-sm">
@@ -203,6 +280,72 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Email Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full relative">
+            <button
+              onClick={() => setShowEmailModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {emailSubmitted ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">You're on the list!</h3>
+                <p className="text-gray-600">We'll notify you when we launch.</p>
+              </div>
+            ) : (
+              <>
+                <div className="text-center mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <span className="text-white font-bold text-xl">H</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Get Early Access</h3>
+                  <p className="text-gray-600">Join the waitlist for AI-powered 3D print photography</p>
+                </div>
+
+                <form onSubmit={handleEmailSubmit} className="space-y-4">
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors"
+                  >
+                    Join Waitlist
+                  </button>
+
+                  <p className="text-xs text-gray-500 text-center">
+                    Be the first to know when we launch. No spam, ever.
+                  </p>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-12">
