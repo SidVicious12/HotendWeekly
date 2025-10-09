@@ -141,62 +141,36 @@ export default function HomePage() {
     reader.readAsDataURL(file)
 
     try {
-      // Get API key from env
-      const apiKey = process.env.NEXT_PUBLIC_REMOVEBG_API_KEY
-
-      if (!apiKey || apiKey === 'your_api_key_here') {
-        // Fallback to simulated processing if no API key
-        setProcessingStatus('Processing (simulated mode)...')
-        const imageData = await new Promise<string>((resolve) => {
-          const reader = new FileReader()
-          reader.onload = (e) => resolve(e.target?.result as string)
-          reader.readAsDataURL(file)
-        })
-
-        setTimeout(() => {
-          setRemovedBgImage(imageData)
-          setProcessedImage(imageData)
-          setIsProcessing(false)
-          setProcessingStatus('')
-        }, 2000)
-        return
-      }
-
-      // Call Remove.bg API directly from client
+      // Call server-side background removal API (now using Replicate RMBG-2.0)
       setProcessingStatus('Removing background with AI...')
       const formData = new FormData()
-      formData.append('image_file', file)
-      formData.append('size', 'auto')
+      formData.append('image', file)
 
-      const response = await fetch('https://api.remove.bg/v1.0/removebg', {
+      const response = await fetch('/api/remove-bg', {
         method: 'POST',
-        headers: {
-          'X-Api-Key': apiKey,
-        },
         body: formData,
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.errors?.[0]?.title || 'Failed to remove background')
+        throw new Error(data.error || 'Failed to remove background')
       }
 
-      // Get the processed image
-      const blob = await response.blob()
-      const imageUrl = URL.createObjectURL(blob)
+      if (data.simulated) {
+        setError(data.message)
+        setIsProcessing(false)
+        return
+      }
 
-      // Convert blob to base64 for canvas processing
-      const base64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result as string)
-        reader.readAsDataURL(blob)
-      })
+      // Get the processed image (already in base64 format)
+      const base64Image = data.image
 
       setProcessingStatus('Applying background...')
-      setRemovedBgImage(base64)
+      setRemovedBgImage(base64Image)
 
       // Composite with selected background
-      await compositeImage(base64, selectedBackground)
+      await compositeImage(base64Image, selectedBackground)
       setIsProcessing(false)
       setProcessingStatus('')
 
