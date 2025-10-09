@@ -493,7 +493,7 @@ export default function HomePage() {
               <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-sm text-red-600">{error}</p>
                 <p className="text-xs text-red-500 mt-1">
-                  Tip: Add your Remove.bg API key to .env.local for real processing
+                  Tip: Make sure REPLICATE_API_TOKEN is configured in Vercel environment variables
                 </p>
               </div>
             )}
