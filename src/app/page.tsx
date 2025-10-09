@@ -28,6 +28,15 @@ export default function HomePage() {
   const [selectedBackground, setSelectedBackground] = useState<string>('white')
   const [processingStatus, setProcessingStatus] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
+  const [selectedModel, setSelectedModel] = useState<string | null>(null)
+  const [virtualTryOnResult, setVirtualTryOnResult] = useState<string | null>(null)
+  const [showModelSelection, setShowModelSelection] = useState(false)
+  const [workflowStep, setWorkflowStep] = useState<1 | 2 | 3 | null>(null)
+  const [productAnalysis, setProductAnalysis] = useState<{
+    category: string
+    displayType: string
+    description: string
+  } | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   // Authentication is optional for now (Hostinger compatibility)
@@ -86,6 +95,33 @@ export default function HomePage() {
       description: 'Professional',
       color: '#3b82f6',
       gradient: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)'
+    }
+  ]
+
+  const modelPoses = [
+    {
+      id: 'pose-1',
+      name: 'Holding Forward',
+      description: 'Product in hand',
+      // Use example reference image for pose control
+      poseUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=1200&fit=crop',
+      previewUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop'
+    },
+    {
+      id: 'pose-2',
+      name: 'Professional Display',
+      description: 'Formal presentation',
+      // Use example reference image for pose control
+      poseUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&h=1200&fit=crop',
+      previewUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=600&fit=crop'
+    },
+    {
+      id: 'pose-3',
+      name: 'Casual Show',
+      description: 'Relaxed display',
+      // Use example reference image for pose control
+      poseUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&h=1200&fit=crop',
+      previewUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=600&fit=crop'
     }
   ]
 
@@ -240,6 +276,77 @@ export default function HomePage() {
       compositeImage(removedBgImage, selectedBackground)
     }
   }, [selectedBackground, removedBgImage])
+
+  const handleVirtualTryOn = async () => {
+    if (!uploadedImage) {
+      setError('Please upload a product image first')
+      return
+    }
+
+    setIsProcessing(true)
+    setError(null)
+    setWorkflowStep(1)
+    setProductAnalysis(null)
+
+    try {
+      // Convert uploaded image to File
+      const productBlob = await fetch(uploadedImage).then(r => r.blob())
+      const productFile = new File([productBlob], 'product.png', { type: 'image/png' })
+
+      // Step 1: AI Analysis
+      setProcessingStatus('🧠 Step 1/3: Analyzing your product with AI vision...')
+      setWorkflowStep(1)
+
+      const formData = new FormData()
+      formData.append('product_image', productFile)
+
+      const response = await fetch('/api/flux-generate', {
+        method: 'POST',
+        body: formData,
+      })
+
+      // Step 2: Scene Generation (happens on backend)
+      setProcessingStatus('🎨 Step 2/3: Generating perfect scene with AI...')
+      setWorkflowStep(2)
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'AI generation failed')
+      }
+
+      if (data.simulated) {
+        setError(data.message)
+        setIsProcessing(false)
+        setWorkflowStep(null)
+        return
+      }
+
+      // Step 3: Compositing (future enhancement)
+      setProcessingStatus('✨ Step 3/3: Finalizing your product photography...')
+      setWorkflowStep(3)
+
+      // Store analysis results
+      if (data.analysis) {
+        setProductAnalysis(data.analysis)
+      }
+
+      // Show final result
+      setVirtualTryOnResult(data.image)
+      setProcessedImage(data.image)
+
+      setIsProcessing(false)
+      setWorkflowStep(null)
+      setProcessingStatus('')
+
+    } catch (err) {
+      console.error('AI generation error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to generate AI model')
+      setIsProcessing(false)
+      setWorkflowStep(null)
+      setProcessingStatus('')
+    }
+  }
 
   const handleDownload = () => {
     if (processedImage) {
@@ -448,8 +555,89 @@ export default function HomePage() {
               </label>
             </div>
 
+            {/* Intelligent AI Generation */}
+            {uploadedImage && !isProcessing && (
+              <div className="mt-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Generate AI Product Photography 🎨</h3>
+                <p className="text-xs text-gray-600 mb-4">AI will analyze your product and create the perfect scene automatically</p>
+
+                <button
+                  onClick={handleVirtualTryOn}
+                  disabled={isProcessing}
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Generate with AI
+                </button>
+
+                {productAnalysis && (
+                  <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                    <p className="text-xs font-semibold text-purple-900 mb-1">AI Analysis Results:</p>
+                    <p className="text-xs text-purple-700">
+                      <span className="font-medium">Category:</span> {productAnalysis.category}
+                    </p>
+                    <p className="text-xs text-purple-700">
+                      <span className="font-medium">Display:</span> {productAnalysis.displayType}
+                    </p>
+                    <p className="text-xs text-purple-700">
+                      <span className="font-medium">Description:</span> {productAnalysis.description}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Progress Steps Indicator */}
+            {isProcessing && workflowStep && (
+              <div className="mt-6 space-y-3">
+                {[1, 2, 3].map((step) => (
+                  <div
+                    key={step}
+                    className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                      workflowStep === step
+                        ? 'bg-purple-100 border-2 border-purple-500'
+                        : workflowStep > step
+                        ? 'bg-green-50 border-2 border-green-500'
+                        : 'bg-gray-50 border-2 border-gray-200'
+                    }`}
+                  >
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                        workflowStep === step
+                          ? 'bg-purple-600 text-white animate-pulse'
+                          : workflowStep > step
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-300 text-gray-600'
+                      }`}
+                    >
+                      {workflowStep > step ? '✓' : step}
+                    </div>
+                    <div className="flex-1">
+                      <p className={`text-sm font-semibold ${
+                        workflowStep === step ? 'text-purple-900' : workflowStep > step ? 'text-green-900' : 'text-gray-600'
+                      }`}>
+                        {step === 1 && '🧠 Analyzing Product'}
+                        {step === 2 && '🎨 Generating Scene'}
+                        {step === 3 && '✨ Final Compositing'}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {step === 1 && 'AI vision analyzing your product...'}
+                        {step === 2 && 'Creating perfect scene with FLUX...'}
+                        {step === 3 && 'Finalizing professional photo...'}
+                      </p>
+                    </div>
+                    {workflowStep === step && (
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Background Selection */}
-            {removedBgImage && !isProcessing && (
+            {removedBgImage && !isProcessing && !virtualTryOnResult && (
               <div className="mt-6">
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">Choose Background</h3>
                 <div className="grid grid-cols-3 gap-3">
