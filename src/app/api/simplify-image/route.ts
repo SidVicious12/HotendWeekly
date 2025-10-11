@@ -103,7 +103,7 @@ Style: Simple vector illustration, flat colors, bold outlines, suitable for mult
       style: "natural"
     })
 
-    const generatedImageUrl = dalleResponse.data[0].url
+    const generatedImageUrl = dalleResponse.data?.[0]?.url
 
     if (!generatedImageUrl) {
       throw new Error('No output image received from DALL-E 3')
