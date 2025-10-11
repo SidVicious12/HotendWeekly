@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import ContactForm from '@/components/ContactForm'
 
 interface Background {
   id: string
@@ -37,6 +38,8 @@ export default function HomePage() {
     displayType: string
     description: string
   } | null>(null)
+  const [simplifiedImage, setSimplifiedImage] = useState<string | null>(null)
+  const [imageDescription, setImageDescription] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   // Authentication is optional for now (Hostinger compatibility)
@@ -130,8 +133,10 @@ export default function HomePage() {
     if (!file) return
 
     setError(null)
-    setIsProcessing(true)
-    setProcessingStatus('Uploading image...')
+    setSimplifiedImage(null) // Reset simplified image
+    setProcessedImage(null) // Reset processed image
+    setRemovedBgImage(null) // Reset background removal
+    setVirtualTryOnResult(null) // Reset AI generation
 
     // Show original image
     const reader = new FileReader()
@@ -139,47 +144,6 @@ export default function HomePage() {
       setUploadedImage(e.target?.result as string)
     }
     reader.readAsDataURL(file)
-
-    try {
-      // Call server-side background removal API (now using Replicate RMBG-2.0)
-      setProcessingStatus('Removing background with AI...')
-      const formData = new FormData()
-      formData.append('image', file)
-
-      const response = await fetch('/api/remove-bg', {
-        method: 'POST',
-        body: formData,
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to remove background')
-      }
-
-      if (data.simulated) {
-        setError(data.message)
-        setIsProcessing(false)
-        return
-      }
-
-      // Get the processed image (already in base64 format)
-      const base64Image = data.image
-
-      setProcessingStatus('Applying background...')
-      setRemovedBgImage(base64Image)
-
-      // Composite with selected background
-      await compositeImage(base64Image, selectedBackground)
-      setIsProcessing(false)
-      setProcessingStatus('')
-
-    } catch (err) {
-      console.error('Processing error:', err)
-      setError(err instanceof Error ? err.message : 'Failed to process image')
-      setIsProcessing(false)
-      setProcessingStatus('')
-    }
   }
 
   const compositeImage = async (bgRemovedImage: string, backgroundId: string) => {
@@ -250,6 +214,64 @@ export default function HomePage() {
       compositeImage(removedBgImage, selectedBackground)
     }
   }, [selectedBackground, removedBgImage])
+
+  const handleSimplifyFor3DPrint = async () => {
+    if (!uploadedImage) {
+      setError('Please upload an image first')
+      return
+    }
+
+    setIsProcessing(true)
+    setError(null)
+    setWorkflowStep(1)
+    setProcessingStatus('👁️ Step 1/2: Analyzing image with GPT-4 Vision...')
+
+    try {
+      // Convert uploaded image to File
+      const imageBlob = await fetch(uploadedImage).then(r => r.blob())
+      const imageFile = new File([imageBlob], 'image.png', { type: 'image/png' })
+
+      const formData = new FormData()
+      formData.append('image', imageFile)
+
+      const response = await fetch('/api/simplify-image', {
+        method: 'POST',
+        body: formData,
+      })
+
+      setWorkflowStep(2)
+      setProcessingStatus('🎨 Step 2/2: Generating simplified version with DALL-E 3...')
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Simplification failed')
+      }
+
+      if (data.simulated) {
+        setError(data.message)
+        setIsProcessing(false)
+        setWorkflowStep(null)
+        return
+      }
+
+      // Show simplified result
+      setSimplifiedImage(data.image)
+      setProcessedImage(data.image)
+      setImageDescription(data.description)
+
+      setIsProcessing(false)
+      setWorkflowStep(null)
+      setProcessingStatus('')
+
+    } catch (err) {
+      console.error('Simplification error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to simplify image')
+      setIsProcessing(false)
+      setWorkflowStep(null)
+      setProcessingStatus('')
+    }
+  }
 
   const handleVirtualTryOn = async () => {
     if (!uploadedImage) {
@@ -326,7 +348,11 @@ export default function HomePage() {
     if (processedImage) {
       const link = document.createElement('a')
       link.href = processedImage
-      link.download = 'hotendweekly-enhanced-3dprint.png'
+      // Use different filename based on what type of processing was done
+      const filename = simplifiedImage
+        ? 'hotendweekly-simplified-3dprint.png'
+        : 'hotendweekly-enhanced-3dprint.png'
+      link.download = filename
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -389,8 +415,8 @@ export default function HomePage() {
               <Link href="#inspiration" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
                 Inspiration
               </Link>
-              <Link href="#affiliate" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-                Affiliate
+              <Link href="#contact" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
+                Contact
               </Link>
               <Link href="#api" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
                 API
@@ -531,82 +557,160 @@ export default function HomePage() {
 
             {/* Intelligent AI Generation */}
             {uploadedImage && !isProcessing && (
-              <div className="mt-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Generate AI Product Photography 🎨</h3>
-                <p className="text-xs text-gray-600 mb-4">AI will analyze your product and create the perfect scene automatically</p>
+              <div className="mt-6 space-y-4">
+                {/* Simplify for 3D Printing */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Simplify for 3D Printing 🖨️</h3>
+                  <p className="text-xs text-gray-600 mb-4">Convert your image to a simplified, vector-style design perfect for multi-color 3D printing</p>
 
-                <button
-                  onClick={handleVirtualTryOn}
-                  disabled={isProcessing}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Generate with AI
-                </button>
+                  <button
+                    onClick={handleSimplifyFor3DPrint}
+                    disabled={isProcessing}
+                    className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 rounded-full font-semibold hover:from-blue-700 hover:to-cyan-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                    Simplify for 3D Printing
+                  </button>
 
-                {productAnalysis && (
-                  <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
-                    <p className="text-xs font-semibold text-purple-900 mb-1">AI Analysis Results:</p>
-                    <p className="text-xs text-purple-700">
-                      <span className="font-medium">Category:</span> {productAnalysis.category}
-                    </p>
-                    <p className="text-xs text-purple-700">
-                      <span className="font-medium">Display:</span> {productAnalysis.displayType}
-                    </p>
-                    <p className="text-xs text-purple-700">
-                      <span className="font-medium">Description:</span> {productAnalysis.description}
-                    </p>
-                  </div>
-                )}
+                  {simplifiedImage && (
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-xs font-semibold text-blue-900 mb-1">✅ Simplified Successfully!</p>
+                      {imageDescription && (
+                        <p className="text-xs text-blue-700 mb-2">
+                          <span className="font-medium">AI Analysis:</span> {imageDescription}
+                        </p>
+                      )}
+                      <p className="text-xs text-blue-700">
+                        Your image has been converted to a clean, vector-style design. Download it below and use with Vectorizer.ai → Figma → Tinkercad for 3D printing.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* AI Product Photography */}
+                <div className="pt-4 border-t border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Generate AI Product Photography 🎨</h3>
+                  <p className="text-xs text-gray-600 mb-4">AI will analyze your product and create the perfect scene automatically</p>
+
+                  <button
+                    onClick={handleVirtualTryOn}
+                    disabled={isProcessing}
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-full font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Generate with AI
+                  </button>
+
+                  {productAnalysis && (
+                    <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                      <p className="text-xs font-semibold text-purple-900 mb-1">AI Analysis Results:</p>
+                      <p className="text-xs text-purple-700">
+                        <span className="font-medium">Category:</span> {productAnalysis.category}
+                      </p>
+                      <p className="text-xs text-purple-700">
+                        <span className="font-medium">Display:</span> {productAnalysis.displayType}
+                      </p>
+                      <p className="text-xs text-purple-700">
+                        <span className="font-medium">Description:</span> {productAnalysis.description}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
             {/* Progress Steps Indicator */}
             {isProcessing && workflowStep && (
               <div className="mt-6 space-y-3">
-                {[1, 2, 3].map((step) => (
-                  <div
-                    key={step}
-                    className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-                      workflowStep === step
-                        ? 'bg-purple-100 border-2 border-purple-500'
-                        : workflowStep > step
-                        ? 'bg-green-50 border-2 border-green-500'
-                        : 'bg-gray-50 border-2 border-gray-200'
-                    }`}
-                  >
+                {simplifiedImage !== null ? (
+                  // 2-step workflow for simplification
+                  [1, 2].map((step) => (
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                      key={step}
+                      className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
                         workflowStep === step
-                          ? 'bg-purple-600 text-white animate-pulse'
+                          ? 'bg-blue-100 border-2 border-blue-500'
                           : workflowStep > step
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-300 text-gray-600'
+                          ? 'bg-green-50 border-2 border-green-500'
+                          : 'bg-gray-50 border-2 border-gray-200'
                       }`}
                     >
-                      {workflowStep > step ? '✓' : step}
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                          workflowStep === step
+                            ? 'bg-blue-600 text-white animate-pulse'
+                            : workflowStep > step
+                            ? 'bg-green-500 text-white'
+                            : 'bg-gray-300 text-gray-600'
+                        }`}
+                      >
+                        {workflowStep > step ? '✓' : step}
+                      </div>
+                      <div className="flex-1">
+                        <p className={`text-sm font-semibold ${
+                          workflowStep === step ? 'text-blue-900' : workflowStep > step ? 'text-green-900' : 'text-gray-600'
+                        }`}>
+                          {step === 1 && '👁️ Analyzing Image'}
+                          {step === 2 && '🎨 Generating Simplified Version'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {step === 1 && 'GPT-4 Vision analyzing your image...'}
+                          {step === 2 && 'DALL-E 3 creating vector-style illustration...'}
+                        </p>
+                      </div>
+                      {workflowStep === step && (
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                      )}
                     </div>
-                    <div className="flex-1">
-                      <p className={`text-sm font-semibold ${
-                        workflowStep === step ? 'text-purple-900' : workflowStep > step ? 'text-green-900' : 'text-gray-600'
-                      }`}>
-                        {step === 1 && '🧠 Analyzing Product'}
-                        {step === 2 && '🎨 Generating Scene'}
-                        {step === 3 && '✨ Final Compositing'}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {step === 1 && 'AI vision analyzing your product...'}
-                        {step === 2 && 'Creating perfect scene with FLUX...'}
-                        {step === 3 && 'Finalizing professional photo...'}
-                      </p>
+                  ))
+                ) : (
+                  // 3-step workflow for AI product photography
+                  [1, 2, 3].map((step) => (
+                    <div
+                      key={step}
+                      className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                        workflowStep === step
+                          ? 'bg-purple-100 border-2 border-purple-500'
+                          : workflowStep > step
+                          ? 'bg-green-50 border-2 border-green-500'
+                          : 'bg-gray-50 border-2 border-gray-200'
+                      }`}
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                          workflowStep === step
+                            ? 'bg-purple-600 text-white animate-pulse'
+                            : workflowStep > step
+                            ? 'bg-green-500 text-white'
+                            : 'bg-gray-300 text-gray-600'
+                        }`}
+                      >
+                        {workflowStep > step ? '✓' : step}
+                      </div>
+                      <div className="flex-1">
+                        <p className={`text-sm font-semibold ${
+                          workflowStep === step ? 'text-purple-900' : workflowStep > step ? 'text-green-900' : 'text-gray-600'
+                        }`}>
+                          {step === 1 && '🧠 Analyzing Product'}
+                          {step === 2 && '🎨 Generating Scene'}
+                          {step === 3 && '✨ Final Compositing'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {step === 1 && 'AI vision analyzing your product...'}
+                          {step === 2 && 'Creating perfect scene with FLUX...'}
+                          {step === 3 && 'Finalizing professional photo...'}
+                        </p>
+                      </div>
+                      {workflowStep === step && (
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
+                      )}
                     </div>
-                    {workflowStep === step && (
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
-                    )}
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             )}
 
@@ -662,10 +766,8 @@ export default function HomePage() {
                     alt="Processed"
                     className="max-h-full rounded-lg object-contain"
                   />
-                ) : uploadedImage && !isProcessing ? (
-                  <img src={uploadedImage} alt="Preview" className="max-h-full rounded-lg object-contain" />
                 ) : (
-                  <p className="text-gray-400">Upload an image to see preview</p>
+                  <p className="text-gray-400">Upload an image and click a button to see results</p>
                 )}
               </div>
             </div>
@@ -771,6 +873,11 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* Contact Section */}
+      <section id="contact" className="bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-20">
+        <ContactForm />
+      </section>
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-12">
