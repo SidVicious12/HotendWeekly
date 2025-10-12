@@ -3,8 +3,21 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { useAuth } from '@/contexts/AuthContext'
 import ContactForm from '@/components/ContactForm'
+
+const ImageTo3DRenderer = dynamic(
+  () => import('@/components/ImageTo3DRenderer').then((mod) => mod.ImageTo3DRenderer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center rounded-2xl bg-white text-sm text-gray-500">
+        Preparing 3D preview...
+      </div>
+    )
+  }
+)
 
 interface Background {
   id: string
@@ -21,6 +34,13 @@ export default function HomePage() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [removedBgImage, setRemovedBgImage] = useState<string | null>(null)
   const [processedImage, setProcessedImage] = useState<string | null>(null)
+  const [sliderPosition, setSliderPosition] = useState(0)
+
+  // Update slider position when active category changes
+  useEffect(() => {
+    const index = categories.findIndex(cat => cat.id === activeCategory)
+    setSliderPosition(index * 25)
+  }, [activeCategory])
   const [isProcessing, setIsProcessing] = useState(false)
   const [showEmailModal, setShowEmailModal] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -34,6 +54,7 @@ export default function HomePage() {
   const [showModelSelection, setShowModelSelection] = useState(false)
   const [workflowStep, setWorkflowStep] = useState<1 | 2 | 3 | null>(null)
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0)
   const [productAnalysis, setProductAnalysis] = useState<{
     category: string
@@ -43,6 +64,8 @@ export default function HomePage() {
   const [simplifiedImage, setSimplifiedImage] = useState<string | null>(null)
   const [imageDescription, setImageDescription] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [stylizedFallback, setStylizedFallback] = useState(false)
+  const [videoFailed, setVideoFailed] = useState(false)
 
   // Authentication is optional for now (Hostinger compatibility)
   // useEffect(() => {
@@ -53,9 +76,9 @@ export default function HomePage() {
 
   const categories = [
     { id: 'miniatures', label: 'Miniatures' },
-    { id: 'functional', label: 'Functional Prints' },
-    { id: 'decorative', label: 'Decorative' },
-    { id: 'accessories', label: 'Accessories' }
+    { id: 'props-cosplay', label: 'Props and Cosplay' },
+    { id: 'generative', label: 'Generative 3D Model' },
+    { id: 'tools', label: 'Tools' }
   ]
 
   const testimonials = [
@@ -105,11 +128,20 @@ export default function HomePage() {
 
   // Auto-rotate testimonials
   useEffect(() => {
+    if (isPaused) return
+
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length)
-    }, 5000) // Change every 5 seconds
+    }, 4000) // Change every 4 seconds
     return () => clearInterval(interval)
-  }, [])
+  }, [isPaused, testimonials.length])
+
+  useEffect(() => {
+    if (activeCategory !== 'miniatures') {
+      setStylizedFallback(false)
+      setVideoFailed(false)
+    }
+  }, [activeCategory])
 
   const backgrounds: Background[] = [
     {
@@ -155,6 +187,13 @@ export default function HomePage() {
       gradient: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)'
     }
   ]
+
+  const miniatureShowcase = {
+    primedSrc: '/miniatures/space-marine-painted.png',
+    paintedSrc: '/miniatures/space-marine-primed.png',
+    promptedSrc: '/miniatures/space-marine-stylized.png',
+    videoSrc: '/media/m2-res_1920p.mp4'
+  }
 
   const modelPoses = [
     {
@@ -560,14 +599,24 @@ export default function HomePage() {
         <div className="mb-16">
           {/* Category Tabs */}
           <div className="flex justify-center mb-8">
-            <div className="inline-flex bg-white rounded-full p-1 shadow-lg">
+            <div className="inline-flex bg-white rounded-full p-1.5 shadow-lg relative gap-1">
+              {/* Animated slider background */}
+              <div
+                className="absolute top-1.5 bottom-1.5 bg-gray-900 rounded-full transition-all duration-300 ease-out"
+                style={{
+                  left: `calc(${sliderPosition}% + 0.375rem)`,
+                  width: 'calc(25% - 0.5rem)'
+                }}
+              />
+
+              {/* Tab buttons */}
               {categories.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                  className={`px-8 py-3 rounded-full text-base font-medium transition-colors relative z-10 whitespace-nowrap ${
                     activeCategory === cat.id
-                      ? 'bg-gray-900 text-white'
+                      ? 'text-white'
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
@@ -577,203 +626,209 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Three Column Layout: Upload -> AI Transform -> Share */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            {/* Left Column: Upload Section */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload your product</h2>
-              <p className="text-gray-500 mb-6">One image is all it takes.</p>
-
-              <div className="bg-gray-100 rounded-3xl p-6 aspect-square flex items-center justify-center">
-                {activeCategory === 'miniatures' && (
-                  <div className="text-center">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <img
-                        src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop"
-                        alt="3D printed miniature"
-                        className="rounded-2xl object-cover w-full h-full"
-                      />
-                    </div>
-                  </div>
-                )}
-                {activeCategory === 'functional' && (
-                  <div className="text-center">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <img
-                        src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400&h=400&fit=crop"
-                        alt="Functional 3D print"
-                        className="rounded-2xl object-cover w-full h-full"
-                      />
-                    </div>
-                  </div>
-                )}
-                {activeCategory === 'decorative' && (
-                  <div className="text-center">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <img
-                        src="https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=400&h=400&fit=crop"
-                        alt="Decorative 3D print"
-                        className="rounded-2xl object-cover w-full h-full"
-                      />
-                    </div>
-                  </div>
-                )}
-                {activeCategory === 'accessories' && (
-                  <div className="text-center">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <img
-                        src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop"
-                        alt="3D printed accessory"
-                        className="rounded-2xl object-cover w-full h-full"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Center Column: AI Enhanced Result */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center lg:text-left">
-                AI-Enhanced Result
-              </h2>
-              <p className="text-gray-500 mb-6 text-center lg:text-left">
-                Professional studio quality in seconds
-              </p>
-
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-2 aspect-[3/4] relative overflow-hidden shadow-2xl">
-                {activeCategory === 'miniatures' && (
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="rounded-2xl object-cover w-full h-full"
-                  >
-                    <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" type="video/mp4" />
+          {/* Three Step Workflow */}
+          {activeCategory === 'miniatures' ? (
+            <div className="space-y-10">
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold text-gray-900">Upload your miniature</h2>
+                  <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl bg-[#f0f1f5] p-6">
+                    <span className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-white/85 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-700 shadow">
+                      Step 1
+                    </span>
                     <img
-                      src="https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?w=600&h=800&fit=crop"
-                      alt="Professional miniature photography"
-                      className="rounded-2xl object-cover w-full h-full"
+                      src={miniatureShowcase.primedSrc}
+                      alt="Unpainted Space Marine miniature ready for upload"
+                      className="h-full w-full object-contain"
+                      onError={(event) => {
+                        event.currentTarget.onerror = null
+                        event.currentTarget.src = '/examples/dragon-realistic.JPG'
+                      }}
                     />
-                  </video>
-                )}
-                {activeCategory === 'functional' && (
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="rounded-2xl object-cover w-full h-full"
-                  >
-                    <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" type="video/mp4" />
-                    <img
-                      src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=600&h=800&fit=crop"
-                      alt="Professional functional print photography"
-                      className="rounded-2xl object-cover w-full h-full"
-                    />
-                  </video>
-                )}
-                {activeCategory === 'decorative' && (
-                  <img
-                    src="https://images.unsplash.com/photo-1595246140625-573b715d11dc?w=600&h=800&fit=crop"
-                    alt="Professional decorative print photography"
-                    className="rounded-2xl object-cover w-full h-full"
-                  />
-                )}
-                {activeCategory === 'accessories' && (
-                  <img
-                    src="https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=600&h=800&fit=crop"
-                    alt="Professional accessory photography"
-                    className="rounded-2xl object-cover w-full h-full"
-                  />
-                )}
+                  </div>
+                </div>
 
-                {/* AI Processing Badge */}
-                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs font-semibold text-gray-900">AI Enhanced</span>
+                <div className="space-y-4">
+                  <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl border border-amber-100 bg-white p-6 shadow-xl">
+                    <span className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700">
+                      Step 2
+                    </span>
+                    <img
+                      src={miniatureShowcase.paintedSrc}
+                      alt="Fully painted miniature produced by Hotend Weekly"
+                      className="h-full w-full object-contain"
+                      onError={(event) => {
+                        event.currentTarget.onerror = null
+                        event.currentTarget.src = '/examples/dragon-paper-cut.png'
+                      }}
+                    />
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900 text-center">AI paint in seconds</h2>
+                </div>
+
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold text-gray-900">Describe the vibe</h2>
+                  <div className="space-y-4">
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-indigo-100 bg-white shadow-xl">
+                      <div className="absolute inset-0 flex items-center justify-center bg-indigo-50/60">
+                        {videoFailed ? (
+                          <div className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-indigo-200 bg-white/80 px-6 text-center">
+                            <p className="text-sm font-semibold text-indigo-700">Preview coming soon</p>
+                            <p className="text-xs text-gray-500">
+                              Add a video at <code className="rounded bg-indigo-100 px-1 py-0.5 text-[10px]">public/media/m2-res_1920p.mp4</code> or a styled render at{' '}
+                              <code className="rounded bg-indigo-100 px-1 py-0.5 text-[10px]">public/miniatures/space-marine-stylized.png</code>.
+                            </p>
+                          </div>
+                        ) : (
+                          <video
+                            className="h-full w-full object-cover"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            controls={false}
+                            preload="metadata"
+                            poster={miniatureShowcase.paintedSrc}
+                            onLoadedData={() => setVideoFailed(false)}
+                            onError={() => setVideoFailed(true)}
+                          >
+                            <source src={miniatureShowcase.videoSrc} type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        )}
+                      </div>
+                    </div>
+
+                    <div aria-hidden className="h-0" />
                   </div>
                 </div>
               </div>
             </div>
-
-            {/* Right Column: Share Section */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Create & Share</h2>
-              <p className="text-gray-500 mb-6">
-                Get eye-catching photos ready for any platform!
-              </p>
-
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+              {/* Step 1: Upload your product */}
               <div className="space-y-4">
-                <div className="bg-white rounded-3xl p-4 aspect-video relative overflow-hidden shadow-lg">
-                  {activeCategory === 'miniatures' && (
+                <h2 className="text-2xl font-bold text-gray-900">Upload your product</h2>
+
+                <div className="bg-gray-200 rounded-2xl p-4 aspect-square flex items-center justify-center relative overflow-hidden">
+                  {activeCategory === 'props-cosplay' && (
                     <img
-                      src="https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=800&h=450&fit=crop"
-                      alt="Miniature lifestyle shot"
-                      className="rounded-2xl object-cover w-full h-full"
+                      src="/props/zelda-sword-parts.png"
+                      alt="Zelda sword 3D printed parts"
+                      className="w-full h-full object-contain rounded-xl p-4"
                     />
                   )}
-                  {activeCategory === 'functional' && (
+                  {activeCategory === 'generative' && (
                     <img
-                      src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=450&fit=crop"
-                      alt="Functional print in use"
-                      className="rounded-2xl object-cover w-full h-full"
+                      src="/examples/dragon-realistic.JPG"
+                      alt="Realistic dragon for generation"
+                      className="w-[80%] h-[80%] object-cover object-[50%_30%] rounded-xl"
                     />
                   )}
-                  {activeCategory === 'decorative' && (
-                    <video
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="rounded-2xl object-cover w-full h-full"
-                    >
-                      <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" type="video/mp4" />
-                      <img
-                        src="https://images.unsplash.com/photo-1615876234886-fd9a39fda97f?w=800&h=450&fit=crop"
-                        alt="Decorative print display"
-                        className="rounded-2xl object-cover w-full h-full"
-                      />
-                    </video>
-                  )}
-                  {activeCategory === 'accessories' && (
-                    <video
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="rounded-2xl object-cover w-full h-full"
-                    >
-                      <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" />
-                      <img
-                        src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=450&fit=crop"
-                        alt="Accessory lifestyle shot"
-                        className="rounded-2xl object-cover w-full h-full"
-                      />
-                    </video>
+                  {activeCategory === 'tools' && (
+                    <img
+                      src="/tools/tools-assembled.jpg"
+                      alt="3D printing measuring tools"
+                      className="w-full h-full object-contain rounded-xl p-4"
+                    />
                   )}
                 </div>
+              </div>
 
-                {/* Platform Tags */}
-                <div className="flex flex-wrap gap-2">
-                  <span className="px-3 py-1.5 bg-white rounded-full text-xs font-medium text-gray-700 shadow-sm border border-gray-200">
-                    ✓ Etsy Ready
-                  </span>
-                  <span className="px-3 py-1.5 bg-white rounded-full text-xs font-medium text-gray-700 shadow-sm border border-gray-200">
-                    ✓ Instagram
-                  </span>
-                  <span className="px-3 py-1.5 bg-white rounded-full text-xs font-medium text-gray-700 shadow-sm border border-gray-200">
-                    ✓ Pinterest
-                  </span>
-                  <span className="px-3 py-1.5 bg-white rounded-full text-xs font-medium text-gray-700 shadow-sm border border-gray-200">
-                    ✓ Your Website
-                  </span>
+              {/* Step 2: Style the Scene */}
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-gray-900">Style the Scene</h2>
+
+                <div className="bg-white rounded-2xl p-4 aspect-square flex items-center justify-center relative overflow-hidden shadow-lg border border-gray-100">
+                  {activeCategory === 'props-cosplay' && (
+                    <img
+                      src="/props/zelda-sword-assembled.png"
+                      alt="Assembled Zelda Master Sword"
+                      className="rounded-xl object-contain max-h-full"
+                    />
+                  )}
+                  {activeCategory === 'generative' && (
+                    <img
+                      src="/examples/dragon-paper-cut.png"
+                      alt="Styled dragon scene"
+                      className="rounded-xl object-contain max-h-full"
+                    />
+                  )}
+                  {activeCategory === 'tools' && (
+                    <img
+                      src="/tools/tools-before.jpg"
+                      alt="Colorful measuring tools parts on workbench"
+                      className="rounded-xl object-contain max-h-full"
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Step 3: Create & Share */}
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-gray-900">Create & Share</h2>
+                {activeCategory === 'generative' && (
+                  <p className="text-sm text-gray-600">
+                    Preview a printable bas-relief generated from your artwork, spin it around,
+                    and export the STL in one click.
+                  </p>
+                )}
+
+                <div
+                  className={`bg-white rounded-2xl aspect-square relative ${
+                    activeCategory === 'generative'
+                      ? 'flex flex-col p-4 overflow-visible'
+                      : 'flex items-center justify-center p-4 overflow-hidden'
+                  }`}
+                  style={
+                    activeCategory === 'generative'
+                      ? undefined
+                      : { backgroundImage: 'repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 50% / 20px 20px' }
+                  }
+                >
+                  {activeCategory === 'generative' ? (
+                    <ImageTo3DRenderer
+                      imageUrl="/examples/dragon-paper-cut.png"
+                      className="flex h-full w-full flex-col"
+                    />
+                  ) : (
+                    <>
+                      {activeCategory === 'props-cosplay' && (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <video
+                            className="rounded-xl w-full h-full object-cover"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            controls
+                          >
+                            <source src="/zelda-test.mp4" type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                      )}
+                      {activeCategory === 'tools' && (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <video
+                            className="rounded-xl w-full h-full object-cover"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            controls
+                          >
+                            <source src="/tools-demo.mp4" type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
@@ -786,60 +841,43 @@ export default function HomePage() {
         </div>
 
         {/* Logo Grid */}
-        <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 lg:gap-16 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+        <div className="flex items-center justify-center gap-12 md:gap-16 lg:gap-20 opacity-40 grayscale">
           {/* Etsy */}
-          <div className="flex items-center justify-center">
-            <svg className="h-8 md:h-10 w-auto fill-gray-600" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
-              <text x="10" y="60" fontFamily="serif" fontSize="48" fontWeight="bold" fontStyle="italic">Etsy</text>
+          <div className="flex items-center justify-center h-12">
+            <svg className="h-10 w-auto" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+              <text x="10" y="60" fontFamily="Georgia, serif" fontSize="56" fontWeight="400" fill="#F56400">Etsy</text>
             </svg>
           </div>
 
-          {/* Shopify */}
-          <div className="flex items-center justify-center">
-            <svg className="h-8 md:h-10 w-auto fill-gray-600" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
-              <text x="10" y="60" fontFamily="sans-serif" fontSize="40" fontWeight="600">shopify</text>
+          {/* Bamboo Lab */}
+          <div className="flex items-center justify-center h-12">
+            <svg className="h-10 w-auto" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg">
+              {/* Bamboo icon */}
+              <g transform="translate(10, 20)">
+                <rect x="0" y="0" width="30" height="60" fill="#3D3D3D"/>
+                <rect x="35" y="0" width="30" height="60" fill="#3D3D3D"/>
+                <path d="M 5 20 L 25 40 L 5 40 Z" fill="white"/>
+                <path d="M 40 20 L 60 40 L 40 40 Z" fill="white"/>
+              </g>
+              {/* Text */}
+              <text x="90" y="58" fontFamily="Arial, sans-serif" fontSize="36" fontWeight="600" fill="#3D3D3D">Bambu</text>
+              <text x="90" y="82" fontFamily="Arial, sans-serif" fontSize="36" fontWeight="600" fill="#3D3D3D">Lab</text>
             </svg>
           </div>
 
-          {/* Instagram */}
-          <div className="flex items-center justify-center">
-            <svg className="h-8 md:h-10 w-auto fill-gray-600" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
-              <text x="10" y="60" fontFamily="cursive" fontSize="38" fontWeight="500" fontStyle="italic">Instagram</text>
+          {/* Snapmaker */}
+          <div className="flex items-center justify-center h-12">
+            <svg className="h-10 w-auto" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg">
+              <text x="10" y="65" fontFamily="Arial, sans-serif" fontSize="48" fontWeight="500" fill="#2B2B2B">snapmaker</text>
             </svg>
           </div>
 
           {/* Thingiverse */}
-          <div className="flex items-center justify-center">
-            <svg className="h-8 md:h-10 w-auto fill-gray-600" viewBox="0 0 220 100" xmlns="http://www.w3.org/2000/svg">
-              <text x="10" y="60" fontFamily="sans-serif" fontSize="36" fontWeight="bold">Thingiverse</text>
-            </svg>
-          </div>
-
-          {/* Printables */}
-          <div className="flex items-center justify-center">
-            <svg className="h-8 md:h-10 w-auto fill-gray-600" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
-              <text x="10" y="60" fontFamily="sans-serif" fontSize="38" fontWeight="700">Printables</text>
-            </svg>
-          </div>
-
-          {/* Pinterest */}
-          <div className="flex items-center justify-center">
-            <svg className="h-8 md:h-10 w-auto fill-gray-600" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
-              <text x="10" y="60" fontFamily="sans-serif" fontSize="38" fontWeight="600">Pinterest</text>
-            </svg>
-          </div>
-
-          {/* Cults3D */}
-          <div className="flex items-center justify-center">
-            <svg className="h-8 md:h-10 w-auto fill-gray-600" viewBox="0 0 180 100" xmlns="http://www.w3.org/2000/svg">
-              <text x="10" y="60" fontFamily="sans-serif" fontSize="38" fontWeight="700">Cults3D</text>
-            </svg>
-          </div>
-
-          {/* MyMiniFactory */}
-          <div className="flex items-center justify-center">
-            <svg className="h-8 md:h-10 w-auto fill-gray-600" viewBox="0 0 260 100" xmlns="http://www.w3.org/2000/svg">
-              <text x="10" y="60" fontFamily="sans-serif" fontSize="34" fontWeight="600">MyMiniFactory</text>
+          <div className="flex items-center justify-center h-12">
+            <svg className="h-10 w-auto" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="100" rx="20" fill="#248BFB"/>
+              <circle cx="50" cy="50" r="35" fill="none" stroke="white" strokeWidth="6"/>
+              <text x="50" y="70" fontFamily="Arial, sans-serif" fontSize="52" fontWeight="700" fill="white" textAnchor="middle">T</text>
             </svg>
           </div>
         </div>
@@ -902,9 +940,13 @@ export default function HomePage() {
           </div>
 
           {/* Testimonial Cards Carousel */}
-          <div className="relative max-w-6xl mx-auto">
+          <div
+            className="relative max-w-6xl mx-auto"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
             {/* Main Testimonial Display - Shows 3 cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 transition-all duration-500">
               {[0, 1, 2].map((offset) => {
                 const index = (currentTestimonial + offset) % testimonials.length
                 const testimonial = testimonials[index]
