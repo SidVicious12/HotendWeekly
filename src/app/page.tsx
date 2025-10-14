@@ -1041,7 +1041,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Hassle-Free Feature Section */}
+      {/* Showcase Feature Section - SellerPic Style */}
       <section className="max-w-7xl mx-auto px-6 lg:px-8 py-20">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
@@ -1051,236 +1051,199 @@ export default function HomePage() {
             </span>
           </h2>
           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-            Instantly generate professional product shots without expensive equipment or complicated setups.
+            Instantly generate model-on-image shots without hiring anyone or booking a studio.
           </p>
         </div>
 
         {/* Two Column Feature Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Left Feature: Swap Backgrounds */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-12 relative overflow-hidden">
-            <div className="relative z-10">
-              <h3 className="text-3xl font-bold text-gray-900 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Feature: Swap Backgrounds Instantly */}
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-6 relative overflow-hidden flex flex-col">
+            <div className="flex-shrink-0">
+              <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
                 Swap Backgrounds Instantly
               </h3>
-              <p className="text-lg text-gray-600 mb-8 max-w-md">
+              <p className="text-sm lg:text-base text-gray-600 mb-4 max-w-md">
                 Cut down on expenses associated with traditional photography setups and studio rentals, making your budget go further.
               </p>
-              <button className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-gray-800 transition-colors">
-                Learn More
-              </button>
             </div>
 
-            {/* Visual Demo */}
-            <div className="mt-12 relative">
-              <div className="flex items-center justify-center gap-8">
-                {/* Before Image */}
-                <div className="relative">
-                  <div className="w-40 h-40 bg-white rounded-2xl shadow-lg overflow-hidden">
-                    <img
-                      src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop"
-                      alt="Original 3D print"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="absolute -top-2 -right-2 bg-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
-                    Before
-                  </div>
-                </div>
-
-                {/* Arrow */}
-                <div className="text-4xl text-gray-400">→</div>
-
-                {/* After Image with background swap */}
-                <div className="relative">
-                  <div className="w-40 h-40 bg-gradient-to-br from-purple-200 to-pink-200 rounded-2xl shadow-xl overflow-hidden flex items-center justify-center">
-                    <img
-                      src="https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?w=400&h=400&fit=crop"
-                      alt="Enhanced 3D print"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="absolute -top-2 -right-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
-                    After
-                  </div>
-                </div>
-              </div>
-
-              {/* Background Options */}
-              <div className="mt-6 flex justify-center gap-3">
-                <div className="w-12 h-12 bg-white rounded-lg shadow-md border-2 border-purple-600"></div>
-                <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg shadow-md"></div>
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg shadow-md"></div>
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg shadow-md"></div>
+            {/* Visual Demo with Goku Before/After */}
+            <div className="flex-grow flex items-center justify-center">
+              <div className="relative w-3/4 max-w-sm rounded-2xl overflow-hidden border border-white/50 shadow-xl">
+                <img
+                  src="/showcase/goku-transformation.png"
+                  alt="3D printed figure transformation"
+                  className="w-full h-auto object-cover"
+                />
               </div>
             </div>
           </div>
 
-          {/* Right Feature: Add Lifestyle Scenes */}
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl p-12 relative overflow-hidden">
-            <div className="relative z-10">
-              <h3 className="text-3xl font-bold text-gray-900 mb-4">
+          {/* Right Feature: Add Lifestyle Scenes to Product Photos */}
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between">
+            <div className="flex-shrink-0">
+              <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
                 Add Lifestyle Scenes to Product Photos
               </h3>
-              <p className="text-lg text-gray-600 mb-8 max-w-md">
+              <p className="text-sm lg:text-base text-gray-600 mb-4 max-w-md">
                 No need for elaborate photoshoots—easily incorporate realistic scenes into your current product images.
               </p>
-              <button className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-gray-800 transition-colors">
-                Learn More
-              </button>
             </div>
 
-            {/* Scene Examples */}
-            <div className="mt-12">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-square">
-                  <img
-                    src="https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=300&h=300&fit=crop"
-                    alt="Lifestyle scene 1"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-square">
-                  <img
-                    src="https://images.unsplash.com/photo-1595246140625-573b715d11dc?w=300&h=300&fit=crop"
-                    alt="Lifestyle scene 2"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-square">
-                  <img
-                    src="https://images.unsplash.com/photo-1615876234886-fd9a39fda97f?w=300&h=300&fit=crop"
-                    alt="Lifestyle scene 3"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-square">
-                  <img
-                    src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=300&h=300&fit=crop"
-                    alt="Lifestyle scene 4"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+            {/* Four Model Showcase Images */}
+            <div className="mt-auto">
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { src: '/showcase/goku-super-saiyan.png', alt: 'Super Saiyan Goku' },
+                  { src: '/showcase/goku-super-saiyan-blue.png', alt: 'Super Saiyan Blue Goku' },
+                  { src: '/showcase/goku-base.png', alt: 'Base Form Goku' },
+                  { src: '/showcase/goku-ultra-instinct.png', alt: 'Ultra Instinct Goku' }
+                ].map((goku, index) => (
+                  <div
+                    key={index}
+                    className="bg-white rounded-xl shadow-lg overflow-hidden aspect-[3/4] border border-gray-100"
+                  >
+                    <img
+                      src={goku.src}
+                      alt={goku.alt}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Single Learn More Button - Centered Below */}
+        <div className="text-center mt-12">
+          <button className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-gray-800 transition-colors text-base">
+            Learn More
+          </button>
+        </div>
       </section>
 
-      {/* Additional Features Section */}
+      {/* Goku Showcase Feature */}
       <section className="max-w-7xl mx-auto px-6 lg:px-8 py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Multi-Angle Feature */}
-          <div className="bg-gray-50 rounded-3xl p-12 relative overflow-hidden">
-            <div className="relative z-10 mb-12">
+          {/* Multi-angle Goku display */}
+          <div className="bg-white rounded-3xl p-12 relative overflow-hidden shadow-xl">
+            <div className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-sky-200/50 via-purple-200/30 to-transparent rounded-full blur-3xl" />
+            <div className="absolute -bottom-32 -left-24 w-72 h-72 bg-gradient-to-tr from-amber-200/40 via-pink-200/30 to-transparent rounded-full blur-3xl" />
+            <div className="relative z-10 mb-10">
               <h3 className="text-3xl font-bold text-gray-900 mb-4">
-                Generate Multi-Angle Product Shots
+                Generate Multi-Angle Model Shots
               </h3>
-              <p className="text-lg text-gray-600 max-w-md">
-                Showcase your 3D print from every angle—automatically create left, front, and right views without the need for multiple photoshoots.
+              <p className="text-lg text-gray-600 max-w-lg">
+                Showcase your product from every angle—automatically create left, front, and right views without the need for multiple photoshoots.
               </p>
             </div>
 
-            {/* Multi-angle preview grid */}
-            <div className="grid grid-cols-4 gap-4">
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-[3/4]">
-                <img
-                  src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=300&h=400&fit=crop"
-                  alt="Left angle view"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-[3/4]">
-                <img
-                  src="https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?w=300&h=400&fit=crop"
-                  alt="Front view"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-[3/4]">
-                <img
-                  src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=300&h=400&fit=crop"
-                  alt="Right angle view"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-[3/4]">
-                <img
-                  src="https://images.unsplash.com/photo-1595246140625-573b715d11dc?w=300&h=400&fit=crop"
-                  alt="Back view"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-
-            {/* Angle indicators */}
-            <div className="mt-4 flex justify-between px-2 text-xs text-gray-500 font-medium">
-              <span>Left</span>
-              <span>Front</span>
-              <span>Right</span>
-              <span>Back</span>
+            <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                {
+                  label: 'Left',
+                  src: '/showcase/goku-super-saiyan-blue.png',
+                  imageClass: '-rotate-6 origin-bottom scale-95 drop-shadow-lg'
+                },
+                {
+                  label: 'Front',
+                  src: '/showcase/goku-super-saiyan-blue.png',
+                  imageClass: 'scale-100 drop-shadow-2xl'
+                },
+                {
+                  label: 'Right',
+                  src: '/showcase/goku-super-saiyan-blue.png',
+                  imageClass: 'rotate-6 origin-bottom scale-95 drop-shadow-lg'
+                },
+                {
+                  label: 'Back',
+                  src: '/showcase/goku-super-saiyan-blue.png',
+                  imageClass: '-scale-x-100 -rotate-3 origin-bottom scale-95 drop-shadow-lg'
+                }
+              ].map((shot) => (
+                <div key={shot.label} className="flex flex-col items-center gap-3">
+                  <div className="w-full bg-gray-50 border border-gray-100 rounded-2xl shadow-md p-4 flex items-center justify-center">
+                    <div className="relative w-full aspect-[3/4] flex items-center justify-center">
+                      <img
+                        src={shot.src}
+                        alt={`${shot.label} angle view`}
+                        className={`h-full w-auto object-contain ${shot.imageClass}`}
+                      />
+                    </div>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-500 tracking-wide">
+                    {shot.label}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Promo Creation Feature */}
+          {/* Promo poster builder */}
           <div className="bg-gray-900 rounded-3xl p-12 relative overflow-hidden text-white">
-            <div className="relative z-10 mb-12">
+            <div className="absolute inset-0">
+              <div className="absolute inset-y-0 -left-20 w-64 bg-gradient-to-br from-sky-500/30 via-blue-500/20 to-transparent blur-3xl" />
+              <div className="absolute inset-y-0 -right-28 w-64 bg-gradient-to-tl from-amber-400/30 via-pink-500/20 to-transparent blur-3xl" />
+            </div>
+            <div className="flex-shrink-0">
               <h3 className="text-3xl font-bold mb-4">
                 Polish and Create Promo Posters
               </h3>
-              <p className="text-lg text-gray-300 max-w-md">
+              <p className="text-lg text-gray-300 max-w-lg">
                 Customize your final images with branded text and layouts—perfect for ads, banners, and social media using tools like Canva.
               </p>
             </div>
 
             {/* Promo Preview */}
-            <div className="bg-white rounded-2xl p-6 shadow-2xl">
-              <div className="space-y-4">
-                {/* Toolbar mockup */}
-                <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
-                      <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+            <div className="relative z-10 mt-10">
+              <div className="bg-white rounded-2xl p-6 shadow-2xl">
+                <div className="space-y-4">
+                  {/* Toolbar mockup */}
+                  <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                      </div>
                     </div>
-                    <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
-                      <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-                      </svg>
+                    <div className="flex items-center gap-2">
+                      {/* Canva logo mockup */}
+                      <div className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">
+                        Canva
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {/* Canva logo mockup */}
-                    <div className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">
-                      Canva
-                    </div>
-                  </div>
-                </div>
 
-                {/* Preview content */}
-                <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl p-6 aspect-video flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute top-4 left-4 text-gray-900">
-                    <h4 className="text-2xl font-bold">NEW ARRIVAL</h4>
-                    <p className="text-sm">Limited Edition Print</p>
+                  {/* Preview content */}
+                  <div className="relative rounded-xl overflow-hidden bg-slate-950 aspect-video flex flex-col items-center justify-center gap-6">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(59,130,246,0.35),_transparent_65%)]" />
+                    <div className="absolute inset-x-8 bottom-10 top-10 bg-gradient-to-br from-indigo-600/30 via-purple-600/20 to-rose-500/20 blur-3xl" />
+                    <img
+                      src="/showcase/goku-super-saiyan-blue.png"
+                      alt="Promo scene featuring Goku"
+                      className="relative w-40 md:w-48 drop-shadow-[0_25px_45px_rgba(59,130,246,0.55)]"
+                    />
+                    <button className="relative bg-white text-gray-900 px-5 py-2 rounded-full text-sm font-semibold shadow-lg hover:bg-gray-100 transition-colors">
+                      use this image
+                    </button>
                   </div>
-                  <img
-                    src="https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?w=400&h=400&fit=crop"
-                    alt="Product in promo"
-                    className="w-40 h-40 object-cover rounded-lg shadow-lg"
-                  />
-                  <div className="absolute bottom-4 right-4 bg-white text-gray-900 px-4 py-2 rounded-full text-sm font-bold">
-                    Shop Now →
-                  </div>
-                </div>
 
-                {/* Export options */}
-                <div className="flex items-center gap-2 pt-2">
-                  <div className="text-xs text-gray-500 font-medium">Export for:</div>
-                  <div className="flex gap-2">
-                    <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">Instagram</span>
-                    <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">Facebook</span>
-                    <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">Pinterest</span>
+                  {/* Export options */}
+                  <div className="flex items-center gap-2 pt-2">
+                    <div className="text-xs text-gray-500 font-medium">Export for:</div>
+                    <div className="flex gap-2">
+                      <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">Instagram</span>
+                      <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">Facebook</span>
+                      <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">Pinterest</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1290,42 +1253,29 @@ export default function HomePage() {
       </section>
 
       {/* Marketing Videos Section */}
-      <section className="bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Ready-to-share marketing videos.{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 italic">
-                Lightning-fast.
-              </span>
-            </h2>
-            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-              Instantly generate model-on-image shots without hiring anyone or booking a studio.
-            </p>
-          </div>
-
-          {/* Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <section className="bg-gradient-to-br from-gray-50 to-gray-100 py-20">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-20">
+          {/* First Video: Transform static images */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left: Text Content */}
-            <div className="space-y-8">
+            <div className="space-y-6">
               <div>
-                <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
                   Transform static images into short videos
-                </h3>
-                <p className="text-lg text-gray-600 mb-8">
-                  Easily convert still images into high-quality, dynamic videos without any hassle, bringing your 3D prints to life.
+                </h2>
+                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                  Easily convert still images into high-quality, dynamic videos without any hassle, bringing your products to life.
                 </p>
-                <button className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-gray-800 transition-colors">
+                <button className="bg-black text-white px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors text-base">
                   Learn More
                 </button>
               </div>
             </div>
 
             {/* Right: Video Display */}
-            <div className="relative">
-              <div className="bg-white rounded-3xl p-6 shadow-2xl">
-                <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 aspect-[9/16]">
-                  {/* Video element */}
+            <div className="relative flex justify-end">
+              <div className="bg-white rounded-3xl p-3 shadow-2xl max-w-xs w-full">
+                <div className="relative rounded-2xl overflow-hidden bg-gray-200 aspect-[9/16]">
                   <video
                     autoPlay
                     loop
@@ -1333,95 +1283,47 @@ export default function HomePage() {
                     playsInline
                     className="w-full h-full object-cover"
                   >
-                    <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" type="video/mp4" />
-                    {/* Fallback image */}
-                    <img
-                      src="https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?w=600&h=1000&fit=crop"
-                      alt="Product video preview"
-                      className="w-full h-full object-cover"
-                    />
+                    <source src="/showcase/3d-printing-demo.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
                   </video>
-
-                  {/* Video overlay elements */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    {/* Top gradient overlay */}
-                    <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/30 to-transparent"></div>
-
-                    {/* Bottom gradient overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/30 to-transparent"></div>
-                  </div>
-
-                  {/* Play indicator */}
-                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                      <span className="text-xs font-semibold text-gray-900">LIVE</span>
-                    </div>
-                  </div>
                 </div>
-
-                {/* Video metadata */}
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1">
-                      <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
-                      </svg>
-                      <span className="text-sm font-semibold text-gray-700">Video</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-gray-500">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      <span className="text-xs">1.2K views</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">Instagram</span>
-                    <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">TikTok</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating badge */}
-              <div className="absolute -top-4 -left-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-2xl shadow-xl">
-                <div className="text-xs font-medium">Auto-Generated</div>
-                <div className="text-lg font-bold">in 30 seconds</div>
               </div>
             </div>
           </div>
 
-          {/* Features grid */}
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+          {/* Second Video: Sync voiceovers */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left: Video Display */}
+            <div className="relative flex justify-start">
+              <div className="bg-white rounded-3xl p-3 shadow-2xl max-w-xs w-full">
+                <div className="relative rounded-2xl overflow-hidden bg-gray-200 aspect-[9/16]">
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                  >
+                    <source src="/showcase/voiceover-sync-demo.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
               </div>
-              <h4 className="text-lg font-bold text-gray-900 mb-2">Instant Creation</h4>
-              <p className="text-sm text-gray-600">Generate videos in seconds, not hours</p>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
-                </svg>
+            {/* Right: Text Content */}
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                  Sync voiceovers with mouth movement
+                </h2>
+                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                  Automatically animate your model's lips to match the voiceover—making your product videos more engaging, lifelike, and persuasive.
+                </p>
+                <button className="bg-black text-white px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors text-base">
+                  Learn More
+                </button>
               </div>
-              <h4 className="text-lg font-bold text-gray-900 mb-2">Platform Ready</h4>
-              <p className="text-sm text-gray-600">Optimized for Instagram, TikTok, and more</p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h4 className="text-lg font-bold text-gray-900 mb-2">No Skills Needed</h4>
-              <p className="text-sm text-gray-600">No video editing experience required</p>
             </div>
           </div>
         </div>
@@ -1598,47 +1500,6 @@ export default function HomePage() {
                   <div>
                     <h4 className="font-bold text-gray-900 mb-1">Video Content Creation</h4>
                     <p className="text-sm text-gray-600">Transform stills into engaging video content</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Additional Tools Section 1 */}
-      <section className="bg-gradient-to-br from-gray-50 to-gray-100 py-20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Left: Content */}
-            <div className="space-y-6">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
-                All-in-One Solution
-              </h2>
-              <p className="text-lg text-gray-600">
-                Access everything you need in one comprehensive toolkit, from Color Changer, Background Replacer to video production, simplifying your workflow.
-              </p>
-              <button className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-gray-800 transition-colors">
-                Learn More
-              </button>
-            </div>
-
-            {/* Right: Visual with background swap demo */}
-            <div className="relative">
-              <div className="bg-white rounded-3xl p-6 shadow-2xl">
-                <img
-                  src="https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?w=800&h=600&fit=crop"
-                  alt="Background swap demo"
-                  className="rounded-2xl w-full"
-                />
-                {/* Dashed selection box overlay */}
-                <div className="absolute inset-0 m-6 border-2 border-dashed border-white rounded-2xl pointer-events-none">
-                  <div className="absolute top-1/2 right-0 transform translate-x-full -translate-y-1/2 ml-4">
-                    <div className="bg-white rounded-2xl p-4 shadow-xl flex flex-col gap-2">
-                      <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
-                      <div className="w-16 h-16 bg-blue-100 rounded-lg"></div>
-                      <div className="w-16 h-16 bg-purple-100 rounded-lg"></div>
-                    </div>
                   </div>
                 </div>
               </div>
