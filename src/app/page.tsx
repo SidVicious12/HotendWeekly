@@ -1055,197 +1055,127 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Two Column Feature Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Feature: Swap Backgrounds Instantly */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-6 relative overflow-hidden flex flex-col">
-            <div className="flex-shrink-0">
-              <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
-                Swap Backgrounds Instantly
-              </h3>
-              <p className="text-sm lg:text-base text-gray-600 mb-4 max-w-md">
-                Cut down on expenses associated with traditional photography setups and studio rentals, making your budget go further.
-              </p>
-            </div>
-
-            {/* Visual Demo with Goku Before/After */}
-            <div className="flex-grow flex items-center justify-center">
-              <div className="relative w-3/4 max-w-sm rounded-2xl overflow-hidden border border-white/50 shadow-xl">
-                <img
-                  src="/showcase/goku-transformation.png"
-                  alt="3D printed figure transformation"
-                  className="w-full h-auto object-cover"
-                />
-              </div>
-            </div>
+        {/* Transformation Showcase - Model-First Design */}
+        <div className="space-y-8">
+          {/* Small Header Above */}
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+              Instantly Transform Your Model
+            </h2>
+            <p className="text-sm text-gray-500">
+              Start with a blank slate and customize: swap colors, hairstyles, poses, or effects with a click.
+            </p>
           </div>
 
-          {/* Right Feature: Add Lifestyle Scenes to Product Photos */}
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between">
-            <div className="flex-shrink-0">
-              <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
-                Add Lifestyle Scenes to Product Photos
-              </h3>
-              <p className="text-sm lg:text-base text-gray-600 mb-4 max-w-md">
-                No need for elaborate photoshoots—easily incorporate realistic scenes into your current product images.
-              </p>
-            </div>
-
-            {/* Four Model Showcase Images */}
-            <div className="mt-auto">
-              <div className="grid grid-cols-4 gap-2">
-                {[
-                  { src: '/showcase/goku-super-saiyan.png', alt: 'Super Saiyan Goku' },
-                  { src: '/showcase/goku-super-saiyan-blue.png', alt: 'Super Saiyan Blue Goku' },
-                  { src: '/showcase/goku-base.png', alt: 'Base Form Goku' },
-                  { src: '/showcase/goku-ultra-instinct.png', alt: 'Ultra Instinct Goku' }
-                ].map((goku, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-xl shadow-lg overflow-hidden aspect-[3/4] border border-gray-100"
-                  >
-                    <img
-                      src={goku.src}
-                      alt={goku.alt}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
+          {/* Four Model Cards - Visually Dominant */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { src: '/showcase/goku-transformation.png', label: 'Unpainted', style: 'Base Model' },
+              { src: '/showcase/goku-super-saiyan.jpeg', label: 'Style 1', style: 'Classic Paint' },
+              { src: '/showcase/goku-super-saiyan-blue.jpeg', label: 'Style 2', style: 'Blue Variant' },
+              { src: '/showcase/goku-ultra-instinct.jpeg', label: 'Style 3', style: 'Ultra Instinct' }
+            ].map((model, index) => (
+              <div
+                key={index}
+                className="group relative bg-white rounded-2xl overflow-hidden border border-gray-200 hover:border-gray-400 transition-all duration-300 hover:scale-105"
+              >
+                {/* Model Image */}
+                <div className="aspect-[3/4] overflow-hidden">
+                  <img
+                    src={model.src}
+                    alt={model.style}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+                {/* Minimal Caption */}
+                <div className="p-4 text-center border-t border-gray-100">
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">{model.label}</p>
+                  <p className="text-sm font-semibold text-gray-700 mt-1">{model.style}</p>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
-        </div>
 
-        {/* Single Learn More Button - Centered Below */}
-        <div className="text-center mt-12">
-          <button className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-gray-800 transition-colors text-base">
-            Learn More
-          </button>
+          {/* Small CTA Below */}
+          <div className="text-center">
+            <button className="bg-black text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors">
+              Explore Customization
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* Goku Showcase Feature */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-8 py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Multi-angle Goku display */}
-          <div className="bg-white rounded-3xl p-12 relative overflow-hidden shadow-xl">
-            <div className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-sky-200/50 via-purple-200/30 to-transparent rounded-full blur-3xl" />
-            <div className="absolute -bottom-32 -left-24 w-72 h-72 bg-gradient-to-tr from-amber-200/40 via-pink-200/30 to-transparent rounded-full blur-3xl" />
-            <div className="relative z-10 mb-10">
-              <h3 className="text-3xl font-bold text-gray-900 mb-4">
-                Generate Multi-Angle Model Shots
-              </h3>
-              <p className="text-lg text-gray-600 max-w-lg">
-                Showcase your product from every angle—automatically create left, front, and right views without the need for multiple photoshoots.
-              </p>
+      {/* Additional Features Section */}
+      <section className="bg-white py-20">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-20">
+          {/* Multi-Angle Model Shots */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left: Text Content */}
+            <div className="space-y-6 scale-[0.9] origin-left">
+              <div>
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                  Generate Multi-Angle Model Shots
+                </h2>
+                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                  Showcase your product from every angle—automatically create left, front, and right views without the need for multiple photoshoots.
+                </p>
+                <button className="bg-black text-white px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors text-base">
+                  Learn More
+                </button>
+              </div>
             </div>
 
-            <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[
-                {
-                  label: 'Left',
-                  src: '/showcase/goku-super-saiyan-blue.png',
-                  imageClass: '-rotate-6 origin-bottom scale-95 drop-shadow-lg'
-                },
-                {
-                  label: 'Front',
-                  src: '/showcase/goku-super-saiyan-blue.png',
-                  imageClass: 'scale-100 drop-shadow-2xl'
-                },
-                {
-                  label: 'Right',
-                  src: '/showcase/goku-super-saiyan-blue.png',
-                  imageClass: 'rotate-6 origin-bottom scale-95 drop-shadow-lg'
-                },
-                {
-                  label: 'Back',
-                  src: '/showcase/goku-super-saiyan-blue.png',
-                  imageClass: '-scale-x-100 -rotate-3 origin-bottom scale-95 drop-shadow-lg'
-                }
-              ].map((shot) => (
-                <div key={shot.label} className="flex flex-col items-center gap-3">
-                  <div className="w-full bg-gray-50 border border-gray-100 rounded-2xl shadow-md p-4 flex items-center justify-center">
-                    <div className="relative w-full aspect-[3/4] flex items-center justify-center">
-                      <img
-                        src={shot.src}
-                        alt={`${shot.label} angle view`}
-                        className={`h-full w-auto object-contain ${shot.imageClass}`}
-                      />
+            {/* Right: Image Grid */}
+            <div className="relative flex justify-end">
+              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl p-8 shadow-2xl w-full scale-[1.2] origin-right">
+                <div className="grid grid-cols-4 gap-3">
+                  {[
+                    { label: 'Left', src: '/showcase/goku-angle-left.jpeg' },
+                    { label: 'Front', src: '/showcase/goku-angle-front.jpeg' },
+                    { label: 'Right', src: '/showcase/goku-angle-right.jpeg' },
+                    { label: 'Back', src: '/showcase/goku-angle-back.jpeg' }
+                  ].map((shot) => (
+                    <div key={shot.label} className="flex flex-col items-center gap-2">
+                      <div className="bg-white rounded-xl overflow-hidden shadow-lg aspect-[3/4]">
+                        <img
+                          src={shot.src}
+                          alt={`${shot.label} angle view`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <span className="text-xs font-medium text-gray-600">{shot.label}</span>
                     </div>
-                  </div>
-                  <span className="text-sm font-semibold text-gray-500 tracking-wide">
-                    {shot.label}
-                  </span>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
 
-          {/* Promo poster builder */}
-          <div className="bg-gray-900 rounded-3xl p-12 relative overflow-hidden text-white">
-            <div className="absolute inset-0">
-              <div className="absolute inset-y-0 -left-20 w-64 bg-gradient-to-br from-sky-500/30 via-blue-500/20 to-transparent blur-3xl" />
-              <div className="absolute inset-y-0 -right-28 w-64 bg-gradient-to-tl from-amber-400/30 via-pink-500/20 to-transparent blur-3xl" />
-            </div>
-            <div className="flex-shrink-0">
-              <h3 className="text-3xl font-bold mb-4">
-                Polish and Create Promo Posters
-              </h3>
-              <p className="text-lg text-gray-300 max-w-lg">
-                Customize your final images with branded text and layouts—perfect for ads, banners, and social media using tools like Canva.
-              </p>
+          {/* Promo Posters */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left: Image Display - Wider Landscape */}
+            <div className="relative flex justify-start">
+              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl p-6 shadow-2xl w-full">
+                <img
+                  src="/showcase/promo-poster-demo.jpeg"
+                  alt="Promo poster creation interface"
+                  className="w-full h-auto rounded-2xl"
+                />
+              </div>
             </div>
 
-            {/* Promo Preview */}
-            <div className="relative z-10 mt-10">
-              <div className="bg-white rounded-2xl p-6 shadow-2xl">
-                <div className="space-y-4">
-                  {/* Toolbar mockup */}
-                  <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-                        </svg>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {/* Canva logo mockup */}
-                      <div className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">
-                        Canva
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Preview content */}
-                  <div className="relative rounded-xl overflow-hidden bg-slate-950 aspect-video flex flex-col items-center justify-center gap-6">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(59,130,246,0.35),_transparent_65%)]" />
-                    <div className="absolute inset-x-8 bottom-10 top-10 bg-gradient-to-br from-indigo-600/30 via-purple-600/20 to-rose-500/20 blur-3xl" />
-                    <img
-                      src="/showcase/goku-super-saiyan-blue.png"
-                      alt="Promo scene featuring Goku"
-                      className="relative w-40 md:w-48 drop-shadow-[0_25px_45px_rgba(59,130,246,0.55)]"
-                    />
-                    <button className="relative bg-white text-gray-900 px-5 py-2 rounded-full text-sm font-semibold shadow-lg hover:bg-gray-100 transition-colors">
-                      use this image
-                    </button>
-                  </div>
-
-                  {/* Export options */}
-                  <div className="flex items-center gap-2 pt-2">
-                    <div className="text-xs text-gray-500 font-medium">Export for:</div>
-                    <div className="flex gap-2">
-                      <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">Instagram</span>
-                      <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">Facebook</span>
-                      <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">Pinterest</span>
-                    </div>
-                  </div>
-                </div>
+            {/* Right: Text Content */}
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                  Polish and Create Promo Posters
+                </h2>
+                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                  Customize your final images with branded text and layouts—perfect for ads, banners, and social media using tools like Canva.
+                </p>
+                <button className="bg-black text-white px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors text-base">
+                  Learn More
+                </button>
               </div>
             </div>
           </div>
@@ -1323,6 +1253,35 @@ export default function HomePage() {
                 <button className="bg-black text-white px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors text-base">
                   Learn More
                 </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Third Section: Social Export */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left: Text Content */}
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                  One-click export to social media platforms
+                </h2>
+                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                  Seamlessly share your videos across TikTok, Instagram, and Facebook—upload, schedule, and publish in just a few taps.
+                </p>
+                <button className="bg-black text-white px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors text-base">
+                  Learn More
+                </button>
+              </div>
+            </div>
+
+            {/* Right: Image Display */}
+            <div className="relative flex justify-end">
+              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl p-8 shadow-2xl w-full">
+                <img
+                  src="/showcase/social-export-demo.jpeg"
+                  alt="Social media export interface"
+                  className="w-full h-auto rounded-2xl"
+                />
               </div>
             </div>
           </div>
