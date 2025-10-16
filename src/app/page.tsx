@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { useAuth } from '@/contexts/AuthContext'
 import ContactForm from '@/components/ContactForm'
+import { ProductShowcase } from '@/components/ProductShowcase'
+import Navigation from '@/components/Navigation'
 
 const ImageTo3DRenderer = dynamic(
   () => import('@/components/ImageTo3DRenderer').then((mod) => mod.ImageTo3DRenderer),
@@ -486,88 +488,7 @@ export default function HomePage() {
       <canvas ref={canvasRef} className="hidden" />
 
       {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">H</span>
-              </div>
-              <span className="text-xl font-semibold text-gray-900">HotendWeekly</span>
-            </Link>
-
-            <div className="hidden md:flex items-center space-x-8">
-              <button className="text-gray-700 hover:text-gray-900 text-sm font-medium flex items-center">
-                Tools
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              <Link href="#pricing" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-                Pricing
-              </Link>
-              <Link href="#inspiration" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-                Inspiration
-              </Link>
-              <Link href="#contact" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-                Contact
-              </Link>
-              <Link href="#api" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-                API
-              </Link>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              {/* Language Selector */}
-              <button className="hidden md:flex items-center space-x-2 text-gray-700 hover:text-gray-900 text-sm font-medium">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                </svg>
-                <span>English</span>
-              </button>
-
-              {user ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
-                  >
-                    <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-semibold">
-                        {user.email?.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  </button>
-
-                  {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
-                      <div className="px-4 py-2 border-b border-gray-200">
-                        <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
-                      </div>
-                      <button
-                        onClick={() => {
-                          signOut()
-                          setShowUserMenu(false)
-                        }}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link
-                  href="/auth/login"
-                  className="bg-black text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
-                >
-                  LOG IN / SIGN UP
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-6 lg:px-8 pt-20 pb-16">
@@ -1108,48 +1029,7 @@ export default function HomePage() {
       {/* Additional Features Section */}
       <section className="bg-white py-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-20">
-          {/* Multi-Angle Model Shots */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Left: Text Content */}
-            <div className="space-y-6 scale-[0.9] origin-left">
-              <div>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                  Generate Multi-Angle Model Shots
-                </h2>
-                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                  Showcase your product from every angle—automatically create left, front, and right views without the need for multiple photoshoots.
-                </p>
-                <button className="bg-black text-white px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors text-base">
-                  Learn More
-                </button>
-              </div>
-            </div>
-
-            {/* Right: Image Grid */}
-            <div className="relative flex justify-end">
-              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl p-8 shadow-2xl w-full scale-[1.2] origin-right">
-                <div className="grid grid-cols-4 gap-3">
-                  {[
-                    { label: 'Left', src: '/showcase/goku-angle-left.jpeg' },
-                    { label: 'Front', src: '/showcase/goku-angle-front.jpeg' },
-                    { label: 'Right', src: '/showcase/goku-angle-right.jpeg' },
-                    { label: 'Back', src: '/showcase/goku-angle-back.jpeg' }
-                  ].map((shot) => (
-                    <div key={shot.label} className="flex flex-col items-center gap-2">
-                      <div className="bg-white rounded-xl overflow-hidden shadow-lg aspect-[3/4]">
-                        <img
-                          src={shot.src}
-                          alt={`${shot.label} angle view`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <span className="text-xs font-medium text-gray-600">{shot.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          <ProductShowcase />
 
           {/* Promo Posters */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -1185,6 +1065,18 @@ export default function HomePage() {
       {/* Marketing Videos Section */}
       <section className="bg-gradient-to-br from-gray-50 to-gray-100 py-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-20">
+          <div className="text-center space-y-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
+              Ready-to-share marketing videos.{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-500 to-blue-500 italic">
+                Lightning-fast.
+              </span>
+            </h2>
+            <p className="text-lg text-gray-600">
+              Instantly generate model-on-image shots without hiring anyone or booking a studio.
+            </p>
+          </div>
+
           {/* First Video: Transform static images */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left: Text Content */}
@@ -1307,88 +1199,17 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left: Visual Demo */}
             <div className="relative">
-              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl p-8 shadow-2xl">
-                {/* Multiple content variations display */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  {/* Product flat lay */}
-                  <div className="bg-white rounded-2xl overflow-hidden shadow-lg aspect-square">
-                    <img
-                      src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop"
-                      alt="Product flat lay"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  {/* Lifestyle shot */}
-                  <div className="bg-white rounded-2xl overflow-hidden shadow-lg aspect-square relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?w=400&h=400&fit=crop"
-                      alt="Lifestyle shot"
-                      className="w-full h-full object-cover"
-                    />
-                    {/* Avatar overlay */}
-                    <div className="absolute top-3 left-3 w-10 h-10 bg-white rounded-full shadow-lg overflow-hidden border-2 border-white">
-                      <img
-                        src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
-                        alt="User avatar"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Mobile preview mockup */}
-                <div className="bg-gray-900 rounded-3xl p-4 shadow-2xl">
-                  <div className="bg-white rounded-2xl overflow-hidden aspect-[9/16]">
-                    <img
-                      src="https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=400&h=700&fit=crop"
-                      alt="Mobile content preview"
-                      className="w-full h-full object-cover"
-                    />
-
-                    {/* Mobile UI overlay */}
-                    <div className="absolute inset-0 flex flex-col justify-between p-4 pointer-events-none">
-                      {/* Top bar */}
-                      <div className="flex items-center justify-between">
-                        <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
-                          <span className="text-xs font-semibold text-gray-900">@maker</span>
-                        </div>
-                        <button className="bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg">
-                          <svg className="w-4 h-4 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                          </svg>
-                        </button>
-                      </div>
-
-                      {/* Bottom bar */}
-                      <div className="flex items-center justify-between bg-black/50 backdrop-blur-sm rounded-2xl p-3">
-                        <button className="p-2">
-                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                          </svg>
-                        </button>
-                        <button className="p-2">
-                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                          </svg>
-                        </button>
-                        <button className="p-2">
-                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                          </svg>
-                        </button>
-                        <button className="p-2">
-                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                          </svg>
-                        </button>
-                        <button className="p-2">
-                          <div className="w-6 h-6 bg-white rounded-full border-2 border-white"></div>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl p-3 shadow-2xl">
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-auto rounded-2xl"
+                >
+                  <source src="/showcase/graffiti-wall.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
               </div>
 
               {/* Floating "One Image" indicator */}
@@ -1422,7 +1243,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900 mb-1">White Background Removal</h4>
-                    <p className="text-sm text-gray-600">Perfect for marketplace listings and catalogs</p>
+                    <p className="text-sm text-gray-600">Marketplace-perfect cutouts and catalog imagery generated in seconds.</p>
                   </div>
                 </div>
 
@@ -1434,7 +1255,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900 mb-1">Lifestyle Scene Generation</h4>
-                    <p className="text-sm text-gray-600">AI-powered scenes that showcase your prints in context</p>
+                    <p className="text-sm text-gray-600">AI-crafted environments that spotlight your products in real-world moments.</p>
                   </div>
                 </div>
 
@@ -1446,21 +1267,54 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900 mb-1">Social Media Formats</h4>
-                    <p className="text-sm text-gray-600">Instagram, Pinterest, TikTok ready in one click</p>
+                    <p className="text-sm text-gray-600">Ready-to-post content tuned for Instagram, Pinterest, TikTok, and every channel you care about.</p>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-1">Video Content Creation</h4>
-                    <p className="text-sm text-gray-600">Transform stills into engaging video content</p>
-                  </div>
-                </div>
+      {/* All-in-One Solution Section */}
+      <section className="bg-gray-50 py-20">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left: Content */}
+            <div className="space-y-6">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
+                All-in-One Solution
+              </h2>
+              <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
+                Access everything you need in one comprehensive toolkit, from Color Changer, Background Replacer to video production, simplifying your workflow.
+              </p>
+              <button className="bg-black text-white px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors text-base">
+                Learn More
+              </button>
+            </div>
+
+            {/* Right: Image with background replacement effect */}
+            <div className="relative">
+              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl overflow-hidden shadow-2xl">
+                <img
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&h=600&fit=crop"
+                  alt="Background replacement demonstration"
+                  className="w-full h-auto"
+                  style={{
+                    clipPath: 'polygon(0 0, 60% 0, 60% 100%, 0 100%)',
+                  }}
+                />
+                <div
+                  className="absolute top-0 right-0 w-[40%] h-full bg-gradient-to-br from-blue-100 to-orange-100"
+                  style={{
+                    clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
+                  }}
+                />
+                {/* Dashed line separator */}
+                <div
+                  className="absolute top-0 h-full border-l-4 border-dashed border-white"
+                  style={{ left: '60%' }}
+                />
               </div>
             </div>
           </div>
@@ -1473,27 +1327,11 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left: Visual grid */}
             <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl p-8 shadow-2xl">
-              <div className="grid grid-cols-4 gap-3">
-                {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                  <div key={i} className="bg-white rounded-xl overflow-hidden shadow-lg aspect-square">
-                    <img
-                      src={`https://images.unsplash.com/photo-${
-                        [
-                          '1565193566173-7a0ee3dbe261',
-                          '1612036782180-6f0b6cd846fe',
-                          '1581092160562-40aa08e78837',
-                          '1595246140625-573b715d11dc',
-                          '1581833971358-2c8b550f87b3',
-                          '1615876234886-fd9a39fda97f',
-                          '1581092918056-0c4c3acd3789'
-                        ][i - 1]
-                      }?w=200&h=200&fit=crop`}
-                      alt={`Product variation ${i}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
+              <img
+                src="/showcase/platform-resize-showcase.jpeg"
+                alt="Auto-resize platform showcase with product variations"
+                className="w-full h-auto rounded-2xl"
+              />
             </div>
 
             {/* Right: Content */}
@@ -1530,148 +1368,124 @@ export default function HomePage() {
           {/* Top row - 3 tools */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             {/* Diversified Fashion Model Database */}
-            <div className="bg-white rounded-3xl p-8 shadow-lg">
-              <div className="bg-gray-100 rounded-2xl p-6 mb-6 aspect-square">
-                <div className="grid grid-cols-3 gap-2">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
-                    <div key={i} className="bg-gray-200 rounded-lg overflow-hidden">
-                      <img
-                        src={`https://images.unsplash.com/photo-${
-                          [
-                            '1494790108377-be9c29b29330',
-                            '1507003211169-0a1dd7228f2d',
-                            '1438761681033-6461ffad8d80',
-                            '1500648767791-00dcc994a43e',
-                            '1534528741775-53994a69daeb',
-                            '1506794778202-cad84cf45f1d',
-                            '1517841905240-472988babdf9',
-                            '1544005313-94ddf0286df2',
-                            '1573496359142-b8d87734a5a2'
-                          ][i - 1]
-                        }?w=150&h=150&fit=crop&crop=faces`}
-                        alt={`Model ${i}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
+            <Link href="/tools/fashion-model-database" className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow cursor-pointer group">
+              <div className="bg-gray-100 rounded-2xl p-6 mb-6 aspect-square flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                <img
+                  src="/showcase/fashion-model-database.jpeg"
+                  alt="Diversified Fashion Model Database"
+                  className="w-full h-full object-contain rounded-xl"
+                />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Diversified Fashion Model Database</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">Diversified Fashion Model Database</h3>
               <p className="text-sm text-gray-600">
                 Discover the industry's most diverse AI fashion models - representing all body types, ethnicities, and generations.
               </p>
-            </div>
+            </Link>
 
             {/* Transform to 3D */}
-            <div className="bg-white rounded-3xl p-8 shadow-lg">
-              <div className="bg-gray-100 rounded-2xl p-6 mb-6 aspect-square flex items-center justify-center">
-                <div className="grid grid-cols-2 gap-4 w-full">
-                  <img
-                    src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=300&h=300&fit=crop"
-                    alt="2D product"
-                    className="rounded-xl shadow-lg"
-                  />
-                  <img
-                    src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=300&h=300&fit=crop"
-                    alt="3D product"
-                    className="rounded-xl shadow-lg"
-                  />
-                </div>
+            <Link href="/tools/transform-to-3d" className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow cursor-pointer group">
+              <div className="bg-gray-100 rounded-2xl p-6 mb-6 aspect-square flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                <img
+                  src="/showcase/transform-to-3d.jpeg"
+                  alt="Transform to 3D"
+                  className="w-full h-full object-contain rounded-xl"
+                />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Transform to 3D</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">Transform to 3D</h3>
               <p className="text-sm text-gray-600">
                 Transform 2D product images into interactive 3D models with AI-powered depth reconstruction.
               </p>
-            </div>
+            </Link>
 
             {/* Magic Eraser */}
-            <div className="bg-white rounded-3xl p-8 shadow-lg">
-              <div className="bg-gray-100 rounded-2xl p-6 mb-6 aspect-square flex items-center justify-center relative overflow-hidden">
-                <div className="grid grid-cols-2 gap-4 w-full">
-                  <div className="relative rounded-xl overflow-hidden shadow-lg">
-                    <img
-                      src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop"
-                      alt="Before eraser"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 border-2 border-dashed border-purple-500 m-4 rounded-lg"></div>
-                  </div>
-                  <img
-                    src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300&h=300&fit=crop"
-                    alt="After eraser"
-                    className="rounded-xl shadow-lg"
-                  />
-                </div>
+            <Link href="/tools/magic-eraser" className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow cursor-pointer group">
+              <div className="bg-gray-100 rounded-2xl p-6 mb-6 aspect-square flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                <img
+                  src="/showcase/magic-eraser.jpeg"
+                  alt="Magic Eraser"
+                  className="w-full h-full object-contain rounded-xl"
+                />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Magic Eraser</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">Magic Eraser</h3>
               <p className="text-sm text-gray-600">
                 Automatically fix flaws and enhance your visuals with a professional finish.
               </p>
-            </div>
+            </Link>
           </div>
 
           {/* Bottom row - 3 tools */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Image Extender */}
-            <div className="bg-white rounded-3xl p-8 shadow-lg">
-              <div className="bg-gray-100 rounded-2xl p-6 mb-6 aspect-square flex items-center justify-center">
-                <div className="relative w-full h-full">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-200 to-transparent opacity-50"></div>
-                  <img
-                    src="https://images.unsplash.com/photo-1595246140625-573b715d11dc?w=400&h=400&fit=crop"
-                    alt="Extended image"
-                    className="w-full h-full object-cover rounded-xl"
-                  />
-                  <div className="absolute top-1/2 left-4 right-4 -translate-y-1/2">
-                    <div className="flex justify-between">
-                      <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Image Extender</h3>
-              <p className="text-sm text-gray-600">
-                Extend your image background naturally by filling in missing parts of the scene.
-              </p>
-            </div>
-
             {/* Image Retouch */}
-            <div className="bg-white rounded-3xl p-8 shadow-lg">
-              <div className="bg-gray-100 rounded-2xl p-6 mb-6 aspect-square flex items-center justify-center">
-                <div className="grid grid-cols-2 gap-4 w-full">
-                  <img
-                    src="https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=300&h=300&fit=crop"
-                    alt="Before retouch"
-                    className="rounded-xl shadow-lg"
-                  />
-                  <img
-                    src="https://images.unsplash.com/photo-1562183241-b937e95585b6?w=300&h=300&fit=crop"
-                    alt="After retouch"
-                    className="rounded-xl shadow-lg"
-                  />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Image Retouch</h3>
-              <p className="text-sm text-gray-600">
-                AI modifies selected image regions based on your text instructions.
-              </p>
-            </div>
-
-            {/* Image Enhancer */}
-            <div className="bg-white rounded-3xl p-8 shadow-lg">
-              <div className="bg-gray-100 rounded-2xl p-6 mb-6 aspect-square flex items-center justify-center">
+            <Link href="/tools/image-retouch" className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow cursor-pointer group">
+              <div className="bg-gray-100 rounded-2xl p-6 mb-6 aspect-square flex items-center justify-center group-hover:bg-gray-200 transition-colors">
                 <img
-                  src="https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=400&h=400&fit=crop"
-                  alt="Enhanced image"
-                  className="rounded-xl shadow-lg w-full h-full object-cover"
+                  src="/showcase/image-retouch.png"
+                  alt="Image Retouch (Color Changing)"
+                  className="w-full h-full object-contain rounded-xl"
                 />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Image Enhancer</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">Image Retouch (Color Changing)</h3>
               <p className="text-sm text-gray-600">
-                Improve lighting, sharpness, and resolution for platform-ready, high-quality images.
+                Modify specific regions of 3D model or image by changing colors, textures, or materials with simple text instructions.
               </p>
-            </div>
+            </Link>
+
+            {/* Image Enhancer */}
+            <Link href="/tools/image-enhancer" className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow cursor-pointer group">
+              <div className="bg-gray-100 rounded-2xl p-6 mb-6 aspect-square flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                <img
+                  src="/showcase/image-enhancer.png"
+                  alt="Image Enhancer (Clarity & Detail)"
+                  className="w-full h-full object-contain rounded-xl"
+                />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">Image Enhancer (Clarity & Detail)</h3>
+              <p className="text-sm text-gray-600">
+                Transform low-resolution blurry 3D scans into crisp, highly detailed visuals, revealing hidden details.
+              </p>
+            </Link>
+
+            {/* Image Extender */}
+            <Link href="/tools/image-extender" className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow cursor-pointer group">
+              <div className="bg-gray-100 rounded-2xl p-6 mb-6 aspect-square flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                <img
+                  src="/showcase/image-extender.png"
+                  alt="Image Extender (Scale & Background)"
+                  className="w-full h-full object-contain rounded-xl"
+                />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">Image Extender (Scale & Background)</h3>
+              <p className="text-sm text-gray-600">
+                Expand the canvas of any 3D render by generating new content that seamlessly blends with the original scene to create larger compositions.
+              </p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-20 mx-6 lg:mx-8 rounded-3xl">
+        <div className="max-w-5xl mx-auto px-6 lg:px-8 text-center">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+            Create Stunning{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 italic">
+              Images
+            </span>{' '}
+            in Minutes
+          </h2>
+          <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-3xl mx-auto">
+            From product photos to dynamic videos, HotendWeekly has everything you need to stand out.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <button className="bg-white text-gray-900 px-8 py-4 rounded-2xl font-semibold hover:bg-gray-100 transition-colors text-lg">
+              Try Now
+            </button>
+            <button className="bg-gray-800 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-gray-700 transition-colors text-lg flex items-center gap-3 border border-gray-700">
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              </svg>
+              Download on the App Store
+            </button>
           </div>
         </div>
       </section>
@@ -2145,38 +1959,6 @@ export default function HomePage() {
                 )}
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA Section */}
-      <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-black py-20 my-20 mx-6 lg:mx-8 rounded-[3rem]">
-        <div className="max-w-5xl mx-auto px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            Create Stunning{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 italic">
-              Images
-            </span>{' '}
-            in Minutes
-          </h2>
-          <p className="text-lg md:text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
-            From product photos to dynamic videos, HotendWeekly has everything you need to stand out.
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button className="bg-white text-gray-900 px-10 py-4 rounded-2xl text-lg font-bold hover:bg-gray-100 transition-colors shadow-xl w-full sm:w-auto">
-              Try Now
-            </button>
-            <button className="bg-white/10 backdrop-blur-sm text-white px-10 py-4 rounded-2xl text-lg font-semibold hover:bg-white/20 transition-colors border border-white/20 flex items-center justify-center gap-3 w-full sm:w-auto">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 22 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.09997 22C7.78997 22.05 6.79997 20.68 5.95997 19.47C4.24997 17 2.93997 12.45 4.69997 9.39C5.56997 7.87 7.12997 6.91 8.81997 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.89 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.09 16.67C20.06 16.74 19.67 18.11 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z" />
-              </svg>
-              <div className="text-left">
-                <div className="text-xs opacity-80">Download on the</div>
-                <div className="text-base font-bold">App Store</div>
-              </div>
-            </button>
           </div>
         </div>
       </section>
