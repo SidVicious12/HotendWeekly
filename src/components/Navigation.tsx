@@ -76,7 +76,7 @@ export default function Navigation() {
               {/* Tools Dropdown Menu */}
               {showToolsDropdown && (
                 <div className="absolute left-0 mt-2 w-[800px] bg-white rounded-2xl shadow-2xl p-6 border border-gray-100">
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-3 gap-4 mb-4">
                     {tools.map((tool) => (
                       <Link
                         key={tool.href}
@@ -98,6 +98,19 @@ export default function Navigation() {
                         </div>
                       </Link>
                     ))}
+                  </div>
+
+                  {/* View All Tools Button */}
+                  <div className="pt-4 border-t border-gray-200">
+                    <Link
+                      href="/tools"
+                      className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                    >
+                      <span>View All Tools</span>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </Link>
                   </div>
                 </div>
               )}
