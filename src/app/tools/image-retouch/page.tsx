@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
+import { ToolStatusBadge } from '@/components/ToolStatusBadge';
 
 export default function ImageRetouchPage() {
   return (
@@ -13,12 +14,17 @@ export default function ImageRetouchPage() {
       <section className="pt-20 pb-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <Link href="/" className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 mb-6">
+            <Link href="/tools" className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 mb-6">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              Back to Home
+              Back to Tools
             </Link>
+
+            <div className="flex justify-center mb-4">
+              <ToolStatusBadge status="planned-q2" />
+            </div>
+
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
               Image{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 italic">
@@ -30,6 +36,25 @@ export default function ImageRetouchPage() {
             <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto">
               Modify specific regions of 3D model or image by changing colors, textures, or materials with simple text instructions.
             </p>
+
+            {/* Coming Soon Notice */}
+            <div className="mt-8 bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-6 max-w-2xl mx-auto">
+              <div className="flex items-start gap-4">
+                <svg className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="text-left">
+                  <h3 className="font-semibold text-yellow-900 mb-2">Coming Q2 2025</h3>
+                  <p className="text-sm text-yellow-800">
+                    This tool is currently in development. In the meantime, check out our{' '}
+                    <Link href="/tools/background-remover" className="underline font-semibold">Background Remover</Link>
+                    {' '}and{' '}
+                    <Link href="/tools/3d-print-simplifier" className="underline font-semibold">3D Print Simplifier</Link>
+                    {' '}which are live now!
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

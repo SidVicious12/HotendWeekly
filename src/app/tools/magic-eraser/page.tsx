@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
+import { ToolStatusBadge } from '@/components/ToolStatusBadge';
 
 export default function MagicEraserPage() {
   return (
@@ -13,12 +14,17 @@ export default function MagicEraserPage() {
       <section className="pt-20 pb-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <Link href="/" className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 mb-6">
+            <Link href="/tools" className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 mb-6">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              Back to Home
+              Back to Tools
             </Link>
+
+            <div className="flex justify-center mb-4">
+              <ToolStatusBadge status="planned-q2" />
+            </div>
+
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 italic">
                 Magic
@@ -28,6 +34,25 @@ export default function MagicEraserPage() {
             <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto">
               Automatically fix flaws and enhance your visuals with a professional finish.
             </p>
+
+            {/* Coming Soon Notice */}
+            <div className="mt-8 bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-6 max-w-2xl mx-auto">
+              <div className="flex items-start gap-4">
+                <svg className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="text-left">
+                  <h3 className="font-semibold text-yellow-900 mb-2">Coming Q2 2025</h3>
+                  <p className="text-sm text-yellow-800">
+                    This tool is currently in development. Join our waitlist to be notified when it launches. In the meantime, check out our{' '}
+                    <Link href="/tools/background-remover" className="underline font-semibold">Background Remover</Link>
+                    {' '}and{' '}
+                    <Link href="/tools/3d-print-simplifier" className="underline font-semibold">3D Print Simplifier</Link>
+                    {' '}which are live now!
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -183,11 +208,11 @@ export default function MagicEraserPage() {
               Remove imperfections and enhance your product photos with AI-powered magic eraser technology.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-gray-900 px-8 py-4 rounded-2xl font-semibold hover:bg-gray-100 transition-colors text-lg">
-                Try It Free
-              </button>
-              <Link href="/pricing" className="bg-gray-800 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-gray-700 transition-colors text-lg border border-gray-700">
-                View Pricing
+              <Link href="/tools/background-remover" className="bg-white text-gray-900 px-8 py-4 rounded-2xl font-semibold hover:bg-gray-100 transition-colors text-lg">
+                Try Background Remover (Live)
+              </Link>
+              <Link href="/tools" className="bg-gray-800 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-gray-700 transition-colors text-lg border border-gray-700">
+                View All Tools
               </Link>
             </div>
           </div>
