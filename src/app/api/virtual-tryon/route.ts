@@ -1,8 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import Replicate from 'replicate'
+import { checkUsageLimit, incrementUsage } from '@/lib/usage-tracker'
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now()
+  let userId: string | null = null
+
   try {
+    // 1. Authenticate user
+    const cookieStore = await cookies()
+    const supabase = createServerComponentClient({ cookies: () => cookieStore })
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    
+    userId = user?.id || null
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // 2. Check usage limits
+    const limitCheck = await checkUsageLimit(user.id, 'virtual-tryon')
+
+    if (!limitCheck.allowed) {
+      // Record rate-limited attempt
+      await incrementUsage(user.id, {
+        toolName: 'virtual-tryon',
+        toolCategory: 'ai_tools',
+        status: 'rate_limited',
+        processingTimeMs: Date.now() - startTime,
+      })
+
+      return NextResponse.json(
+        {
+          error: `Usage limit exceeded: ${limitCheck.reason}`,
+          currentUsage: limitCheck.currentUsage,
+          limit: limitCheck.limit,
+          dailyRemaining: limitCheck.dailyRemaining,
+          monthlyRemaining: limitCheck.monthlyRemaining,
+          upgradeUrl: '/pricing',
+        },
+        { status: 429 }
+      )
+    }
+
+    // 3. Parse and validate request
     const formData = await request.formData()
     const garmentImage = formData.get('garment_image') as File
     const modelImage = formData.get('model_image') as File
@@ -65,6 +111,22 @@ export async function POST(request: NextRequest) {
     // The output is a URL to the generated image
     const imageUrl = Array.isArray(output) ? output[0] : output
 
+    // 4. Record successful usage
+    await incrementUsage(user.id, {
+      toolName: 'virtual-tryon',
+      toolCategory: 'ai_tools',
+      processingTimeMs: Date.now() - startTime,
+      status: 'success',
+      requestMetadata: {
+        garmentImageSize: garmentBuffer.byteLength,
+        modelImageSize: modelBuffer.byteLength,
+        category,
+      },
+      responseMetadata: {
+        outputUrl: imageUrl,
+      },
+    })
+
     return NextResponse.json({
       success: true,
       image: imageUrl,
@@ -73,6 +135,18 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Virtual try-on error:', error)
+
+    // Record failed usage
+    if (userId) {
+      await incrementUsage(userId, {
+        toolName: 'virtual-tryon',
+        toolCategory: 'ai_tools',
+        processingTimeMs: Date.now() - startTime,
+        status: 'error',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
+
     return NextResponse.json(
       {
         error: 'Failed to process virtual try-on',

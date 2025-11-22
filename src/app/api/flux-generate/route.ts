@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import OpenAI from 'openai'
 import Replicate from 'replicate'
+import { checkUsageLimit, incrementUsage } from '@/lib/usage-tracker'
 
 // Product category definitions for intelligent routing
 interface ProductAnalysis {
@@ -11,7 +14,49 @@ interface ProductAnalysis {
 }
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now()
+  let userId: string | null = null
+
   try {
+    // 1. Authenticate user
+    const cookieStore = await cookies()
+    const supabase = createServerComponentClient({ cookies: () => cookieStore })
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    
+    userId = user?.id || null
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // 2. Check usage limits
+    const limitCheck = await checkUsageLimit(user.id, 'flux-generate')
+
+    if (!limitCheck.allowed) {
+      await incrementUsage(user.id, {
+        toolName: 'flux-generate',
+        toolCategory: 'ai_tools',
+        status: 'rate_limited',
+        processingTimeMs: Date.now() - startTime,
+      })
+
+      return NextResponse.json(
+        {
+          error: `Usage limit exceeded: ${limitCheck.reason}`,
+          currentUsage: limitCheck.currentUsage,
+          limit: limitCheck.limit,
+          dailyRemaining: limitCheck.dailyRemaining,
+          monthlyRemaining: limitCheck.monthlyRemaining,
+          upgradeUrl: '/pricing',
+        },
+        { status: 429 }
+      )
+    }
+
+    // 3. Parse and validate request
     const formData = await request.formData()
     const productImage = formData.get('product_image') as File
 
@@ -135,6 +180,22 @@ Examples:
     // For now, return the generated scene
     // Future: Use inpainting to insert actual product
 
+    // 4. Record successful usage
+    await incrementUsage(user.id, {
+      toolName: 'flux-generate',
+      toolCategory: 'ai_tools',
+      processingTimeMs: Date.now() - startTime,
+      status: 'success',
+      requestMetadata: {
+        productImageSize: productBuffer.byteLength,
+        category: analysis.category,
+        displayType: analysis.displayType,
+      },
+      responseMetadata: {
+        outputUrl: sceneImageUrl,
+      },
+    })
+
     return NextResponse.json({
       success: true,
       image: sceneImageUrl,
@@ -152,6 +213,17 @@ Examples:
 
   } catch (error) {
     console.error('❌ Workflow error:', error)
+
+    // Record failed usage
+    if (userId) {
+      await incrementUsage(userId, {
+        toolName: 'flux-generate',
+        toolCategory: 'ai_tools',
+        processingTimeMs: Date.now() - startTime,
+        status: 'error',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
