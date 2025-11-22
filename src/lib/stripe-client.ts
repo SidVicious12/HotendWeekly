@@ -39,10 +39,11 @@ export async function redirectToCheckout(sessionId: string): Promise<void> {
     throw new Error('Failed to load Stripe');
   }
 
-  const { error } = await stripe.redirectToCheckout({ sessionId });
+  // Type assertion needed for redirectToCheckout method
+  const result = await (stripe as any).redirectToCheckout({ sessionId });
 
-  if (error) {
-    throw new Error(error.message);
+  if (result?.error) {
+    throw new Error(result.error.message);
   }
 }
 

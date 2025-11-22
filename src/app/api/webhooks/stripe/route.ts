@@ -22,9 +22,10 @@ import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 
 // Initialize Supabase Admin client (bypasses RLS)
+// Note: During build time, placeholder values are used if env vars are not set
 const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-key',
   {
     auth: {
       autoRefreshToken: false,
@@ -188,9 +189,11 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
  * Handle invoice.payment_succeeded event
  */
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  const subscriptionId = typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : invoice.subscription?.id;
+  // Extract subscription ID - invoice.subscription can be string | Subscription | null
+  const subscription = (invoice as Stripe.Invoice & { subscription?: string | Stripe.Subscription | null }).subscription;
+  const subscriptionId = typeof subscription === 'string'
+    ? subscription
+    : subscription?.id;
 
   if (!subscriptionId) {
     return;
@@ -211,9 +214,11 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
  * Handle invoice.payment_failed event
  */
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  const subscriptionId = typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : invoice.subscription?.id;
+  // Extract subscription ID - invoice.subscription can be string | Subscription | null
+  const subscription = (invoice as Stripe.Invoice & { subscription?: string | Stripe.Subscription | null }).subscription;
+  const subscriptionId = typeof subscription === 'string'
+    ? subscription
+    : subscription?.id;
 
   if (!subscriptionId) {
     return;

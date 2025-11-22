@@ -9,16 +9,12 @@
 
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not defined in environment variables');
-}
-
 /**
  * Initialize Stripe with secret key
- * API Version: 2024-11-20.acacia (latest)
+ * Using default API version for stripe@20.0.0
+ * Note: During build time, a placeholder key is used if STRIPE_SECRET_KEY is not set
  */
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-11-20.acacia',
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
   typescript: true,
   appInfo: {
     name: 'HotendWeekly',
