@@ -119,15 +119,6 @@ export default function Navigation() {
             <Link href="/pricing" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
               Pricing
             </Link>
-            <Link href="/#inspiration" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-              Inspiration
-            </Link>
-            <Link href="/#contact" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-              Contact
-            </Link>
-            <Link href="/#api" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-              API
-            </Link>
           </div>
 
           <div className="flex items-center space-x-4">
