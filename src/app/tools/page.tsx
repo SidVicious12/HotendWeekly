@@ -85,8 +85,8 @@ export default function ToolsPage() {
     <div className="min-h-screen bg-white">
       <Navigation />
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-20">
+      {/* Hero Section - Hidden on Mobile */}
+      <section className="hidden md:block bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
@@ -103,10 +103,20 @@ export default function ToolsPage() {
         </div>
       </section>
 
+      {/* Mobile-Only Simple Header */}
+      <section className="md:hidden pt-6 pb-4">
+        <div className="max-w-7xl mx-auto px-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            AI Tools
+          </h1>
+          <p className="text-sm text-gray-600">Transform your photos instantly</p>
+        </div>
+      </section>
+
       {/* Live Tools Section */}
-      <section className="py-12">
+      <section className="py-12 md:py-12">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="mb-8">
+          <div className="mb-8 hidden md:block">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
                 Live Tools
@@ -174,8 +184,8 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      {/* Coming Soon Section */}
-      <section className="py-12 pb-20">
+      {/* Coming Soon Section - Hidden on Mobile */}
+      <section className="hidden md:block py-12 pb-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
@@ -220,8 +230,8 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 py-20">
+      {/* CTA Section - Hidden on Mobile */}
+      <section className="hidden md:block bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 py-20">
         <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Ready to Transform Your Product Photos?
