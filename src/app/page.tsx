@@ -3,15 +3,15 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 
-const showcaseImages = [
-  { src: '/showcase/transform-to-3d.jpeg', alt: 'Geometric vase', bg: 'bg-gray-100' },
-  { src: '/miniatures/space-marine-painted.png', alt: 'Painted miniature', bg: 'bg-gray-900' },
-  { src: '/showcase/goku-base.jpeg', alt: 'Mechanical gears', bg: 'bg-gray-100' },
-  { src: '/showcase/image-enhancer.png', alt: 'Architectural model', bg: 'bg-gray-100' },
-]
+// Dynamic import with SSR disabled for Three.js component
+const DottedSurface = dynamic(
+  () => import('@/components/DottedSurface').then((mod) => mod.DottedSurface),
+  { ssr: false }
+)
 
 export default function HomePage() {
   const [email, setEmail] = useState('')
@@ -53,69 +53,25 @@ export default function HomePage() {
 
   return (
     <div className={cn("min-h-screen flex")}>
-      {/* Left Side - Showcase */}
+      {/* Left Side - Animated Background */}
       <div className={cn(
-        "hidden lg:flex lg:w-1/2 flex-col p-10",
-        "bg-gradient-to-br from-purple-50/80 via-pink-50/60 to-blue-50/80"
+        "hidden lg:flex lg:w-1/2 flex-col justify-between p-8 relative overflow-hidden",
+        "bg-white"
       )}>
-        {/* Logo */}
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 relative">
-            <svg viewBox="0 0 48 48" className="w-full h-full">
-              {/* Nozzle body */}
-              <defs>
-                <linearGradient id="nozzleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#8B5CF6" />
-                  <stop offset="100%" stopColor="#3B82F6" />
-                </linearGradient>
-              </defs>
-              <path d="M24 4 L32 12 L32 20 L28 24 L28 36 L24 44 L20 36 L20 24 L16 20 L16 12 Z" fill="url(#nozzleGradient)" />
-              <circle cx="24" cy="32" r="8" fill="none" stroke="#06B6D4" strokeWidth="2" />
-              <circle cx="24" cy="32" r="12" fill="none" stroke="#06B6D4" strokeWidth="1" opacity="0.5" />
-            </svg>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xl font-bold text-purple-600 leading-tight">Hot End</span>
-            <span className="text-xl font-bold text-blue-600 leading-tight">Weekly</span>
-          </div>
-        </div>
+        {/* Dotted Surface Animation */}
+        <DottedSurface />
 
-        {/* Showcase Images Grid */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="relative w-[420px] h-[420px]">
-            {/* Decorative rings */}
-            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 420 420">
-              <circle cx="210" cy="210" r="200" fill="none" stroke="#06B6D4" strokeWidth="1.5" opacity="0.3" />
-              <circle cx="210" cy="210" r="170" fill="none" stroke="#06B6D4" strokeWidth="1" opacity="0.2" />
-              <circle cx="210" cy="210" r="140" fill="none" stroke="#06B6D4" strokeWidth="0.5" opacity="0.15" />
-              {/* Partial arcs */}
-              <path d="M 60 120 A 180 180 0 0 1 180 30" fill="none" stroke="#06B6D4" strokeWidth="2" opacity="0.4" />
-              <path d="M 340 300 A 180 180 0 0 1 240 390" fill="none" stroke="#06B6D4" strokeWidth="2" opacity="0.4" />
-            </svg>
-            
-            {/* Image grid - 2x2 layout */}
-            <div className="absolute top-4 left-8 w-40 h-40 rounded-full overflow-hidden shadow-2xl border-4 border-white">
-              <img src={showcaseImages[0].src} alt={showcaseImages[0].alt} className={cn("w-full h-full object-cover", showcaseImages[0].bg)} />
-            </div>
-            <div className="absolute top-8 right-8 w-36 h-36 rounded-full overflow-hidden shadow-2xl border-4 border-white bg-gray-900">
-              <img src={showcaseImages[1].src} alt={showcaseImages[1].alt} className="w-full h-full object-contain p-2" />
-            </div>
-            <div className="absolute bottom-16 left-4 w-36 h-36 rounded-full overflow-hidden shadow-2xl border-4 border-white">
-              <img src={showcaseImages[2].src} alt={showcaseImages[2].alt} className={cn("w-full h-full object-cover", showcaseImages[2].bg)} />
-            </div>
-            <div className="absolute bottom-4 right-12 w-40 h-40 rounded-full overflow-hidden shadow-2xl border-4 border-white">
-              <img src={showcaseImages[3].src} alt={showcaseImages[3].alt} className={cn("w-full h-full object-cover", showcaseImages[3].bg)} />
-            </div>
-          </div>
-        </div>
+        {/* Spacer */}
+        <div className="flex-1" />
 
-        {/* Tagline */}
-        <div className="pb-4">
-          <h1 className="text-3xl font-bold text-gray-900 leading-tight">
+        {/* Marketing text at bottom */}
+        <div className="text-center pb-4 relative z-10">
+          <h2 className="text-2xl md:text-3xl font-bold text-purple-600 mb-1">
             Elevate Your 3D Prints with AI.
-            <br />
+          </h2>
+          <p className="text-xl md:text-2xl font-semibold text-purple-500">
             Perfect Your Models in Minutes.
-          </h1>
+          </p>
         </div>
       </div>
 
@@ -189,6 +145,7 @@ export default function HomePage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 required
+                suppressHydrationWarning
                 className={cn(
                   "w-full px-4 py-3 border border-gray-300 rounded-lg",
                   "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent",
@@ -209,6 +166,7 @@ export default function HomePage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
+                  suppressHydrationWarning
                   className={cn(
                     "w-full px-4 py-3 border border-gray-300 rounded-lg pr-20",
                     "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent",
