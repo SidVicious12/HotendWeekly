@@ -25,7 +25,7 @@ export default function LoginPage() {
 
       if (error) throw error
 
-      // Redirect to main app
+      // Redirect to homepage
       router.push('/')
     } catch (error: any) {
       setError(error.message || 'Failed to login')

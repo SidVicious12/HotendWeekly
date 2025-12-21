@@ -8,39 +8,49 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        background: '#ffffff',
+        foreground: '#000000',
         primary: {
-          50: '#f0f9ff',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          900: '#1e3a8a',
+          DEFAULT: '#000000',
+          foreground: '#ffffff',
         },
-        white: '#fff',
-        black: '#000',
-        transparent: 'transparent',
-        blue: {
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
+        secondary: {
+          DEFAULT: '#f4f4f5',
+          foreground: '#18181b',
         },
-        indigo: {
-          300: '#a5b4fc',
+        muted: {
+          DEFAULT: '#f4f4f5',
+          foreground: '#71717a',
         },
-        violet: {
-          200: '#ddd6fe',
+        accent: {
+          DEFAULT: '#f4f4f5',
+          foreground: '#18181b',
+          purple: '#A855F7',
+          pink: '#EC4899',
+          orange: '#F97316',
         },
+        border: '#e4e4e7',
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      },
+      borderRadius: {
+        'xl': '1rem',
+        '2xl': '1.5rem',
+        '3xl': '2rem',
       },
       animation: {
-        aurora: "aurora 60s linear infinite",
+        'fade-in': 'fadeIn 0.5s ease-in-out',
+        'slide-up': 'slideUp 0.5s ease-out',
       },
       keyframes: {
-        aurora: {
-          from: {
-            backgroundPosition: "50% 50%, 50% 50%",
-          },
-          to: {
-            backgroundPosition: "350% 50%, 350% 50%",
-          },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
         },
       },
     },

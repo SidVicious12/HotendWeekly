@@ -34,5 +34,5 @@ export const miniatureShowcase = {
   primedSrc: '/miniatures/space-marine-painted.png',
   paintedSrc: '/miniatures/space-marine-primed.png',
   promptedSrc: '/miniatures/space-marine-stylized.png',
-  videoSrc: '/media/m2-res_1920p.mp4'
+  videoSrc: '' // Removed video as per user request for simplicity
 }

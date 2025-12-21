@@ -2,40 +2,40 @@ import Link from 'next/link'
 
 const tools = [
   {
-    href: '/tools/fashion-model-database',
-    title: 'Diversified Fashion Model Database',
-    description: 'Access AI-generated diverse models to display your 3D printed fashion items.',
-    image: '/showcase/fashion-model-database.png'
-  },
-  {
-    href: '/tools/transform-to-3d',
-    title: 'Transform to 3D',
-    description: 'Convert any 2D image of your print into an interactive 3D model preview.',
-    image: '/showcase/transform-to-3d.png'
+    href: '/tools/layer-detail-enhancer',
+    title: 'Layer Detail Enhancer',
+    description: 'Smooth 3D print layer lines while preserving details.',
+    image: '/showcase/layer-detail-enhancer.png'
   },
   {
     href: '/tools/magic-eraser',
     title: 'Magic Eraser',
-    description: 'Automatically fix flaws and enhance your visuals with a professional finish.',
-    image: '/showcase/magic-eraser.jpeg'
-  },
-  {
-    href: '/tools/image-retouch',
-    title: 'Image Retouch (Color Changing)',
-    description: 'Modify specific regions of 3D model or image by changing colors, textures, or materials with simple text instructions.',
-    image: '/showcase/image-retouch.png'
+    description: 'Remove unwanted objects or blemishes from your photos.',
+    image: '/showcase/magic-eraser.png'
   },
   {
     href: '/tools/image-enhancer',
-    title: 'Image Enhancer (Clarity & Detail)',
-    description: 'Transform low-resolution blurry 3D scans into crisp, highly detailed visuals, revealing hidden details.',
+    title: 'Image Enhancer',
+    description: 'Upscale and improve image quality with AI.',
     image: '/showcase/image-enhancer.png'
   },
   {
-    href: '/tools/image-extender',
-    title: 'Image Extender (Scale & Background)',
-    description: 'Expand the canvas of any 3D render by generating new content that seamlessly blends with the original scene.',
-    image: '/showcase/image-extender.png'
+    href: '/tools/color-changer',
+    title: 'Color Changer',
+    description: 'Change the color of objects or backgrounds instantly.',
+    image: '/showcase/color-changer.png'
+  },
+  {
+    href: '/tools/print-scene-generator',
+    title: 'Print Scene Generator',
+    description: 'Generate realistic lifestyle scenes for your 3D prints.',
+    image: '/showcase/print-scene-generator.png'
+  },
+  {
+    href: '/tools/texture-preview',
+    title: 'Texture Preview',
+    description: 'Visualize different materials on your models.',
+    image: '/showcase/texture-preview.png'
   }
 ]
 
