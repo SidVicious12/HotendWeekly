@@ -67,7 +67,7 @@ export async function checkUsageLimit(
     const { data, error } = await supabase.rpc('check_usage_limit', {
       p_user_id: userId,
       p_tool_name: toolName,
-    });
+    } as any);
 
     if (error) {
       console.error('Error checking usage limit:', error);
@@ -107,7 +107,7 @@ export async function incrementUsage(
       p_user_id: userId,
       p_tool_name: toolName,
       p_credits: 1,
-    });
+    } as any);
 
     if (rpcError) {
       console.error('Error incrementing usage:', rpcError);
@@ -123,7 +123,7 @@ export async function incrementUsage(
       processing_time_ms: processingTimeMs,
       status,
       error_message: errorMessage,
-    });
+    } as any);
 
     if (insertError) {
       console.error('Error recording usage:', insertError);
@@ -144,7 +144,7 @@ export async function getUserUsageStats(userId: string) {
       .from('user_subscription_details')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .single() as any;
 
     if (error) {
       console.error('Error fetching user usage stats:', error);
@@ -152,14 +152,14 @@ export async function getUserUsageStats(userId: string) {
     }
 
     return {
-      dailyUsage: data.daily_usage || 0,
-      monthlyUsage: data.monthly_usage || 0,
-      dailyLimit: data.daily_tool_usage_limit || 0,
-      monthlyLimit: data.monthly_tool_usage_limit || 0,
-      dailyRemaining: data.daily_remaining || 0,
-      monthlyRemaining: data.monthly_remaining || 0,
-      tierName: data.tier_name || 'Tinkerer',
-      tierSlug: data.tier_slug || 'tinkerer',
+      dailyUsage: data?.daily_usage || 0,
+      monthlyUsage: data?.monthly_usage || 0,
+      dailyLimit: data?.daily_tool_usage_limit || 0,
+      monthlyLimit: data?.monthly_tool_usage_limit || 0,
+      dailyRemaining: data?.daily_remaining || 0,
+      monthlyRemaining: data?.monthly_remaining || 0,
+      tierName: data?.tier_name || 'Tinkerer',
+      tierSlug: data?.tier_slug || 'tinkerer',
     };
   } catch (error) {
     console.error('Error fetching user usage stats:', error);
@@ -230,8 +230,8 @@ export async function resetDailyQuotas(): Promise<void> {
   try {
     if (!supabase) return;
 
-    const { error } = await supabase
-      .from('usage_quotas')
+    const { error } = await (supabase
+      .from('usage_quotas') as any)
       .update({
         daily_usage: 0,
         daily_reset_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
@@ -255,8 +255,8 @@ export async function resetMonthlyQuotas(): Promise<void> {
   try {
     if (!supabase) return;
 
-    const { error } = await supabase
-      .from('usage_quotas')
+    const { error } = await (supabase
+      .from('usage_quotas') as any)
       .update({
         monthly_usage: 0,
         monthly_reset_at: new Date(
