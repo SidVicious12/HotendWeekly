@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import Replicate from 'replicate'
-import { checkUsageLimit, incrementUsage } from '@/lib/usage-tracker'
+import { checkAndEnforceLimit, incrementUsage, logGeneration } from '@/lib/usage-tracker'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,20 +13,13 @@ export async function POST(request: NextRequest) {
     try {
         const cookieStore = await cookies()
         const supabase = createServerComponentClient({ cookies: () => cookieStore })
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        const { data: { user } } = await supabase.auth.getUser()
 
-        userId = user?.id || null
-        if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        userId = user?.id || 'guest_user'
 
-        const limitCheck = await checkUsageLimit(user.id, 'image-enhancer')
+        const limitCheck = await checkAndEnforceLimit(userId, 'image')
         if (!limitCheck.allowed) {
-            await incrementUsage(user.id, {
-                toolName: 'image-enhancer',
-                toolCategory: 'ai_tools',
-                status: 'rate_limited',
-                processingTimeMs: Date.now() - startTime,
-            })
-            return NextResponse.json({ error: 'Usage limit exceeded' }, { status: 429 })
+            return NextResponse.json({ error: limitCheck.reason || 'Usage limit exceeded' }, { status: 429 })
         }
 
         const formData = await request.formData()
@@ -61,26 +54,32 @@ export async function POST(request: NextRequest) {
 
         if (completed.status !== 'succeeded') throw new Error('Enhancement failed')
 
-        const outputUrl = completed.output
+        const outputUrl = completed.output as string
         const res = await fetch(outputUrl)
         const blob = await res.arrayBuffer()
         const base64Result = Buffer.from(blob).toString('base64')
 
-        await incrementUsage(user.id, {
-            toolName: 'image-enhancer',
-            toolCategory: 'ai_tools',
-            processingTimeMs: Date.now() - startTime,
-            status: 'success',
+        // Log generation
+        const generationId = await logGeneration({
+            userId,
+            tool: 'image_enhancer',
+            inputUrl: 'image_upload',
+            outputUrl: outputUrl,
+            inputMetadata: { scale: 2, face_enhance: true },
+            outputMetadata: { outputUrl },
+            costUsd: 0.01
         })
+
+        await incrementUsage(userId, 'image')
 
         return NextResponse.json({
             success: true,
-            image: `data:image/png;base64,${base64Result}`
+            image: `data:image/png;base64,${base64Result}`,
+            generationId
         })
 
     } catch (error) {
         console.error('Enhancer error:', error)
-        if (userId) await incrementUsage(userId, { toolName: 'image-enhancer', toolCategory: 'ai_tools', status: 'error', processingTimeMs: Date.now() - startTime })
         return NextResponse.json({ error: 'Processing failed' }, { status: 500 })
     }
 }

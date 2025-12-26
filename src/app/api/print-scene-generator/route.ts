@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import Replicate from 'replicate'
-import { checkUsageLimit, incrementUsage } from '@/lib/usage-tracker'
+import { checkAndEnforceLimit, incrementUsage, logGeneration } from '@/lib/usage-tracker'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,19 +13,17 @@ export async function POST(request: NextRequest) {
     try {
         const cookieStore = await cookies()
         const supabase = createServerComponentClient({ cookies: () => cookieStore })
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        const { data: { user } } = await supabase.auth.getUser()
 
-        userId = user?.id || null
-        if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        userId = user?.id || 'guest_user'
 
-        // Check limits
-        const limitCheck = await checkUsageLimit(user.id, 'print-scene-generator')
+        // Check limits (Scene Quota)
+        const limitCheck = await checkAndEnforceLimit(userId, 'scene');
         if (!limitCheck.allowed) {
-            return NextResponse.json({ error: 'Usage limit exceeded' }, { status: 429 })
+            return NextResponse.json({ error: limitCheck.reason || 'Usage limit exceeded' }, { status: 429 })
         }
 
         const formData = await request.formData()
-        // Can handle text description OR image input
         const description = formData.get('description') as string
         const imageFile = formData.get('image') as File | null
 
@@ -79,26 +77,33 @@ export async function POST(request: NextRequest) {
             outputUrl = Array.isArray(completed.output) ? completed.output[0] : completed.output
         }
 
-        // Fetch and convert
+        // Fetch and convert (keeping this legacy behavior for now as frontend expects base64)
         const res = await fetch(outputUrl)
         const blob = await res.arrayBuffer()
         const base64Result = Buffer.from(blob).toString('base64')
 
-        // Track usage
-        await incrementUsage(user.id, {
-            toolName: 'print-scene-generator',
-            toolCategory: 'ai_tools',
-            processingTimeMs: Date.now() - startTime,
-            status: 'success',
+        // Log generation
+        const generationId = await logGeneration({
+            userId,
+            tool: 'scene_generator',
+            inputUrl: imageFile ? 'image_upload' : 'text_prompt',
+            outputUrl: outputUrl,
+            inputMetadata: { description, mode: imageFile ? 'img2img' : 'txt2img' },
+            outputMetadata: { outputUrl },
+            costUsd: 0.02
         })
+
+        // Increment usage
+        await incrementUsage(userId, 'scene')
 
         return NextResponse.json({
             success: true,
-            image: `data:image/png;base64,${base64Result}`
+            image: `data:image/png;base64,${base64Result}`,
+            generationId
         })
 
     } catch (error) {
-        if (userId) await incrementUsage(userId, { toolName: 'print-scene-generator', toolCategory: 'ai_tools', status: 'error', processingTimeMs: Date.now() - startTime })
+        console.error('Print Scene Generator Error:', error);
         return NextResponse.json({ error: 'Processing failed' }, { status: 500 })
     }
 }

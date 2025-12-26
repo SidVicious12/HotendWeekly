@@ -85,6 +85,11 @@ export default function TransformTo3DPage() {
     reader.readAsDataURL(file);
   };
 
+  // Feedback State
+  const [generationId, setGenerationId] = useState<string | null>(null);
+  const [feedbackRating, setFeedbackRating] = useState<number>(0);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+
   const handleGenerate = async () => {
     if (!uploadedImage) return;
     setIsProcessing(true);
@@ -92,6 +97,9 @@ export default function TransformTo3DPage() {
     setUploadProgress(10);
     setLoadingStage('Preparing image...');
     setIsControlsOpen(false); // Collapse controls on mobile
+    setGenerationId(null);
+    setFeedbackRating(0);
+    setFeedbackSubmitted(false);
 
     try {
       const response = await fetch(uploadedImage);
@@ -127,6 +135,7 @@ export default function TransformTo3DPage() {
 
       setModelUrl(data.modelUrl);
       setSelectedModel(data.modelUrl);
+      setGenerationId(data.generationId); // Capture ID for feedback
       setUploadProgress(100);
       setLoadingStage('Complete!');
 
@@ -142,6 +151,23 @@ export default function TransformTo3DPage() {
       setIsProcessing(false);
       setUploadProgress(0);
       setLoadingStage('');
+      setIsControlsOpen(true); // Open controls to show result/feedback
+    }
+  };
+
+  const handleFeedback = async (rating: number) => {
+    setFeedbackRating(rating);
+    if (!generationId) return;
+
+    try {
+      await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ generationId, rating })
+      });
+      setFeedbackSubmitted(true);
+    } catch (e) {
+      console.error('Failed to submit feedback', e);
     }
   };
 
@@ -297,6 +323,29 @@ export default function TransformTo3DPage() {
               {error}
             </div>
           )}
+
+          {/* Feedback Dialog (Desktop) */}
+          {activeModelUrl && !isProcessing && (
+            <div className="mt-4 bg-purple-50 rounded-xl p-4 text-center border border-purple-100">
+              <p className="text-sm text-purple-800 font-medium mb-2">
+                {feedbackSubmitted ? "Thanks for your feedback! 🧠" : "Rate result for AI Training"}
+              </p>
+              <div className="flex justify-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => handleFeedback(star)}
+                    disabled={feedbackSubmitted}
+                    className={`text-2xl transition-transform hover:scale-110 ${star <= feedbackRating ? 'text-amber-400' : 'text-gray-300'
+                      } ${feedbackSubmitted ? 'cursor-default' : 'cursor-pointer'}`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Gallery */}
           <div className="mt-auto pt-4 border-t border-gray-200">
             <h4 className="font-bold text-gray-800 mb-3 flex items-center justify-between">
@@ -417,6 +466,29 @@ export default function TransformTo3DPage() {
                   </>
                 )}
               </button>
+
+              {/* Feedback Widget */}
+              {activeModelUrl && !isProcessing && (
+                <div className="bg-purple-50 rounded-xl p-4 text-center">
+                  <p className="text-sm text-purple-800 font-medium mb-2">
+                    {feedbackSubmitted ? "Thanks for your help! 🧠" : "Rate the 3D Quality"}
+                  </p>
+                  <div className="flex justify-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => handleFeedback(star)}
+                        disabled={feedbackSubmitted}
+                        className={`text-2xl transition-transform hover:scale-110 ${star <= feedbackRating ? 'text-amber-400' : 'text-gray-300'
+                          } ${feedbackSubmitted ? 'cursor-default' : 'cursor-pointer'}`}
+                      >
+                        ★
+                      </button>
+                    ))}
+                  </div>
+                  {feedbackSubmitted && <p className="text-xs text-purple-600 mt-1">Training our AI...</p>}
+                </div>
+              )}
 
               {/* Export Options (only if model ready) */}
               {activeModelUrl && !isProcessing && (

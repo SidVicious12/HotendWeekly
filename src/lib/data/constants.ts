@@ -36,3 +36,41 @@ export const miniatureShowcase = {
   promptedSrc: '/miniatures/space-marine-stylized.png',
   videoSrc: '' // Removed video as per user request for simplicity
 }
+
+export const PLAN_CONFIG = {
+  free: {
+    label: 'Free',
+    monthlyPrice: 0,
+    imageLimit: 5,
+    sceneLimit: 0,
+    models3DLimit: 0,
+  },
+  starter: {
+    label: 'Starter',
+    monthlyPrice: 19,
+    imageLimit: 100,
+    sceneLimit: 0,
+    models3DLimit: 0,
+  },
+  pro: {
+    label: 'Pro',
+    monthlyPrice: 49,
+    imageLimit: 500,
+    sceneLimit: 100,
+    models3DLimit: 0,
+  },
+  premium: {
+    label: 'Premium (Add-on)',
+    monthlyPrice: 29,
+    imageLimit: 500,
+    sceneLimit: 100,
+    models3DLimit: 20,
+  },
+  enterprise: {
+    label: 'Enterprise',
+    monthlyPrice: null,
+    custom: true,
+  },
+};
+
+export type PlanTier = keyof typeof PLAN_CONFIG;

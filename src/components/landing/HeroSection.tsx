@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import { Star, ArrowRight } from 'lucide-react';
+// import Link from 'next/link';
+import { Star } from 'lucide-react';
 
 export function HeroSection() {
   return (
@@ -29,21 +29,55 @@ export function HeroSection() {
           Remove layer lines, fix lighting, and add studio backgrounds in seconds.
         </p>
 
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
-          <Link
-            href="/auth/signup"
-            className="w-full sm:w-auto px-8 py-4 bg-black text-white rounded-full font-semibold text-lg hover:bg-gray-800 transition-all hover:scale-105 flex items-center justify-center gap-2"
+        {/* Waitlist Form */}
+        <div className="w-full max-w-md mx-auto mb-20">
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const form = e.target as HTMLFormElement;
+              const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+              const btn = form.querySelector('button');
+              if (btn) btn.disabled = true;
+
+              try {
+                const res = await fetch('/api/waitlist', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (data.success || data.message?.includes('already')) {
+                  alert('Thanks for joining! 🚀');
+                  form.reset();
+                } else {
+                  alert(data.error || 'Something went wrong.');
+                }
+              } catch (err) {
+                console.error(err);
+                alert('Failed to join waitlist.');
+              } finally {
+                if (btn) btn.disabled = false;
+              }
+            }}
+            className="flex flex-col sm:flex-row gap-3"
           >
-            Start Free Trial
-            <ArrowRight className="w-5 h-5" />
-          </Link>
-          <Link
-            href="/demo"
-            className="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 border border-gray-200 rounded-full font-semibold text-lg hover:bg-gray-50 transition-all hover:border-gray-300"
-          >
-            See Examples
-          </Link>
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter your email"
+              required
+              className="flex-1 px-6 py-4 rounded-full border border-gray-300 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-lg"
+            />
+            <button
+              type="submit"
+              className="px-8 py-4 bg-black text-white rounded-full font-bold text-lg hover:bg-gray-800 transition-all hover:scale-105 whitespace-nowrap"
+            >
+              Join Waitlist
+            </button>
+          </form>
+          <p className="text-sm text-gray-400 mt-4">
+            Join 2,000+ sellers on the waitlist. Early access coming soon.
+          </p>
         </div>
 
         {/* Hero Visual Match */}
