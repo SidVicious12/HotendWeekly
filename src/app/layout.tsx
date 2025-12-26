@@ -1,12 +1,25 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/Providers'
+import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister'
+import { MobileBottomNav } from '@/components/MobileBottomNav'
 
 const inter = Inter({ subsets: ['latin'] })
 
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#A855F7',
+}
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://hotendweekly.com'),
+  manifest: '/manifest.json',
   title: {
     default: 'HotendWeekly - AI Photo Tools for 3D Print Sellers',
     template: '%s | HotendWeekly'
@@ -20,6 +33,11 @@ export const metadata: Metadata = {
     email: false,
     address: false,
     telephone: false,
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'HotendWeekly',
   },
   openGraph: {
     type: 'website',
@@ -69,7 +87,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <ServiceWorkerRegister />
+          <MobileBottomNav />
+        </Providers>
       </body>
     </html>
   )

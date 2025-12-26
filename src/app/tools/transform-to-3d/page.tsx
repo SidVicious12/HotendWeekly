@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import { convertGLBtoSTL, downloadBlob } from '@/lib/stl-exporter';
+import { ChevronUp, ChevronDown, Download, Image as ImageIcon, Wand2, Share2, Box, Layers } from 'lucide-react';
 
 // Type for model-viewer web component
 declare global {
@@ -29,11 +30,14 @@ export default function TransformTo3DPage() {
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [loadingStage, setLoadingStage] = useState('');
-  const [credits] = useState(50); // Display only for now
+  const [credits] = useState(50);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [isExportingSTL, setIsExportingSTL] = useState(false);
   const [savedModels, setSavedModels] = useState<SavedModel[]>([]);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+
+  // Mobile UI States
+  const [isControlsOpen, setIsControlsOpen] = useState(true);
 
   // Load model-viewer script
   useEffect(() => {
@@ -87,6 +91,7 @@ export default function TransformTo3DPage() {
     setError(null);
     setUploadProgress(10);
     setLoadingStage('Preparing image...');
+    setIsControlsOpen(false); // Collapse controls on mobile
 
     try {
       const response = await fetch(uploadedImage);
@@ -132,6 +137,7 @@ export default function TransformTo3DPage() {
     } catch (err) {
       console.error('Generation error:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate 3D model');
+      setIsControlsOpen(true); // Re-open control panel on error
     } finally {
       setIsProcessing(false);
       setUploadProgress(0);
@@ -168,9 +174,9 @@ export default function TransformTo3DPage() {
   const activeModelUrl = selectedModel || modelUrl;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
-      {/* MakerWorld-style Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+    <div className="h-[100dvh] flex flex-col bg-gray-50 overflow-hidden">
+      {/* Desktop Header */}
+      <header className="hidden md:flex bg-white border-b border-gray-200 px-4 py-3 items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-4">
           <Link href="/tools" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,15 +185,13 @@ export default function TransformTo3DPage() {
             Image to 3D Model
           </Link>
         </div>
-
         <div className="flex items-center gap-4">
-          {/* Credits Display */}
+          {/* Credits */}
           <div className="flex items-center gap-2 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-full px-4 py-1.5">
             <span className="text-amber-600">🪙</span>
             <span className="font-semibold text-amber-700">Credit: {credits}</span>
           </div>
-
-          {/* Export Button */}
+          {/* Desktop Export */}
           <div className="relative">
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
@@ -198,18 +202,15 @@ export default function TransformTo3DPage() {
                 }`}
             >
               Export
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              <ChevronDown className="w-4 h-4" />
             </button>
-
             {showExportMenu && activeModelUrl && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
                 <button
                   onClick={handleDownloadGLB}
                   className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3"
                 >
-                  <span className="text-2xl">📦</span>
+                  <Box className="w-5 h-5" />
                   <div>
                     <div className="font-medium">Download GLB</div>
                     <div className="text-xs text-gray-500">3D viewer compatible</div>
@@ -220,7 +221,7 @@ export default function TransformTo3DPage() {
                   disabled={isExportingSTL}
                   className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3"
                 >
-                  <span className="text-2xl">🖨️</span>
+                  <Layers className="w-5 h-5" />
                   <div>
                     <div className="font-medium">
                       {isExportingSTL ? 'Converting...' : 'Download STL'}
@@ -234,21 +235,32 @@ export default function TransformTo3DPage() {
         </div>
       </header>
 
-      {/* Main Content - Full Screen 3D Viewer */}
-      <div className="flex-1 flex">
-        {/* Left Sidebar - Upload */}
-        <aside className="w-80 bg-white border-r border-gray-200 p-4 flex flex-col">
-          <h3 className="font-bold text-gray-800 mb-4">Source Image</h3>
+      {/* Main Container */}
+      <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden relative">
 
+        {/* Mobile Header Overlay */}
+        <div className="md:hidden absolute top-0 left-0 right-0 p-4 z-10 flex justify-between items-start pointer-events-none">
+          <div className="pointer-events-auto bg-white/80 backdrop-blur-md rounded-full px-3 py-1.5 text-xs font-semibold shadow-sm border border-gray-200">
+            Image to 3D
+          </div>
+          <div className="pointer-events-auto bg-amber-50/90 backdrop-blur-md border border-amber-200 rounded-full px-3 py-1.5 flex items-center gap-1 shadow-sm">
+            <span className="text-amber-600 text-xs">🪙</span>
+            <span className="font-bold text-amber-700 text-xs">{credits}</span>
+          </div>
+        </div>
+
+        {/* Sidebar (Desktop) / Bottom Sheet (Mobile) Controls */}
+
+        {/* DESKTOP SIDEBAR */}
+        <aside className="hidden md:flex w-80 bg-white border-r border-gray-200 p-4 flex-col overflow-y-auto">
+          <h3 className="font-bold text-gray-800 mb-4">Source Image</h3>
           {/* Upload Area */}
           <div className="bg-gray-50 rounded-xl p-2 mb-4">
             {!uploadedImage ? (
               <label className="cursor-pointer block">
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 hover:border-purple-400 hover:bg-purple-50/50 transition-all text-center">
                   <div className="w-12 h-12 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-3 text-purple-500">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
+                    <ImageIcon className="w-6 h-6" />
                   </div>
                   <span className="text-sm font-medium text-gray-700">Upload Image</span>
                   <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
@@ -261,14 +273,12 @@ export default function TransformTo3DPage() {
                   onClick={() => { setUploadedImage(null); setModelUrl(null); setSelectedModel(null); }}
                   className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <span className="sr-only">Remove</span>
+                  ×
                 </button>
               </div>
             )}
           </div>
-
           {/* Generate Button */}
           {uploadedImage && (
             <button
@@ -279,26 +289,15 @@ export default function TransformTo3DPage() {
                 : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:shadow-lg hover:shadow-purple-500/30'
                 }`}
             >
-              {isProcessing ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  {loadingStage || 'Processing...'} ({uploadProgress}%)
-                </span>
-              ) : '✨ Generate 3D Model'}
+              {isProcessing ? 'Processing... ' + uploadProgress + '%' : '✨ Generate 3D Model'}
             </button>
           )}
-
-          {/* Error */}
           {error && (
             <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
               {error}
             </div>
           )}
-
-          {/* Model Gallery */}
+          {/* Gallery */}
           <div className="mt-auto pt-4 border-t border-gray-200">
             <h4 className="font-bold text-gray-800 mb-3 flex items-center justify-between">
               <span>Recent Models</span>
@@ -315,17 +314,12 @@ export default function TransformTo3DPage() {
                   <img src={model.thumbnailUrl} alt="Model" className="w-full h-full object-cover" />
                 </button>
               ))}
-              {savedModels.length === 0 && (
-                <div className="col-span-3 text-center text-gray-400 text-sm py-4">
-                  No models yet
-                </div>
-              )}
             </div>
           </div>
         </aside>
 
-        {/* 3D Viewer - Full Screen */}
-        <main className="flex-1 bg-gradient-to-br from-gray-100 to-gray-200 relative">
+        {/* 3D Viewer Area (Shared) */}
+        <main className="flex-1 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
           {activeModelUrl ? (
             <model-viewer
               src={activeModelUrl}
@@ -338,31 +332,117 @@ export default function TransformTo3DPage() {
               style={{ width: '100%', height: '100%' }}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+            <div className="flex flex-col items-center justify-center h-full text-gray-400 p-8 text-center">
               {isProcessing ? (
                 <div className="text-center">
                   <div className="w-20 h-20 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                   <p className="text-purple-600 font-medium text-lg">Reconstructing Geometry...</p>
-                  <p className="text-sm mt-2">This usually takes 30-60 seconds</p>
+                  <p className="text-sm mt-2">{loadingStage}</p>
                 </div>
               ) : (
                 <>
-                  <svg className="w-24 h-24 opacity-30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
-                  </svg>
-                  <p className="text-lg font-medium">Upload an image to generate 3D</p>
-                  <p className="text-sm mt-1">Your model will appear here</p>
+                  <ImageIcon className="w-20 h-20 opacity-30 mb-4" />
+                  <p className="text-lg font-medium">Upload an image to start</p>
+                  <p className="text-sm mt-1">Your 3D model will appear here</p>
                 </>
               )}
             </div>
           )}
         </main>
-      </div>
 
-      {/* Hide default navigation on this page for cleaner MakerWorld look */}
-      <style jsx global>{`
-        nav.fixed { display: none !important; }
-      `}</style>
+        {/* MOBILE BOTTOM SHEET CONTROLS */}
+        <div
+          className={`
+                md:hidden bg-white shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] 
+                transition-all duration-300 ease-in-out z-20 pb-safe-area
+                ${isControlsOpen ? 'h-auto max-h-[70vh]' : 'h-16'}
+                absolute bottom-16 left-0 right-0 rounded-t-3xl border-t border-gray-100 flex flex-col
+            `}
+        >
+          {/* Handle */}
+          <button
+            onClick={() => setIsControlsOpen(!isControlsOpen)}
+            className="w-full flex items-center justify-center h-10 hover:bg-gray-50 rounded-t-3xl shrink-0"
+          >
+            <div className="w-12 h-1 bg-gray-300 rounded-full" />
+          </button>
+
+          <div className="px-6 pb-6 overflow-y-auto flex-1">
+            {/* Collapsed Warning/Summary */}
+            {!isControlsOpen && (
+              <div className="flex justify-between items-center -mt-2" onClick={() => setIsControlsOpen(true)}>
+                <span className="font-semibold text-gray-900">
+                  {isProcessing ? 'Generating...' : (activeModelUrl ? 'Model Ready' : 'Configure Model')}
+                </span>
+                <ChevronUp className="w-5 h-5 text-gray-500" />
+              </div>
+            )}
+
+            {/* Expanded Content */}
+            <div className={`${!isControlsOpen ? 'hidden' : 'block'} space-y-4`}>
+              {/* Upload Control */}
+              <div>
+                <div className="flex items-center gap-3">
+                  <label className="flex-1 cursor-pointer bg-gray-50 border border-gray-200 text-gray-600 rounded-xl px-4 py-3 text-sm font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 h-14">
+                    <ImageIcon className="w-5 h-5" />
+                    {uploadedImage ? 'Change Image' : 'Upload Image'}
+                    <input type="file" onChange={handleImageUpload} className="hidden" accept="image/*" />
+                  </label>
+                  {uploadedImage && (
+                    <button onClick={() => setUploadedImage(null)} className="p-3 bg-red-50 text-red-500 rounded-xl border border-red-100 h-14 w-14 flex items-center justify-center">
+                      <span className="text-xl">×</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Generate Button */}
+              <button
+                onClick={handleGenerate}
+                disabled={isProcessing || !uploadedImage}
+                className={`w-full py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2 shadow-lg transition-all ${isProcessing || !uploadedImage
+                  ? 'bg-gray-300 cursor-not-allowed shadow-none'
+                  : 'bg-gradient-to-r from-purple-600 to-pink-600 shadow-purple-200'
+                  }`}
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="animate-spin w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
+                    {uploadProgress}%
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="w-5 h-5" />
+                    Generate 3D
+                  </>
+                )}
+              </button>
+
+              {/* Export Options (only if model ready) */}
+              {activeModelUrl && !isProcessing && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleDownloadGLB}
+                    className="flex-1 bg-gray-900 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2"
+                  >
+                    <Box className="w-4 h-4" /> GLB
+                  </button>
+                  <button
+                    onClick={handleDownloadSTL}
+                    disabled={isExportingSTL}
+                    className="flex-1 bg-white border border-gray-200 text-gray-900 py-3 rounded-xl font-medium flex items-center justify-center gap-2"
+                  >
+                    <Layers className="w-4 h-4" /> STL
+                  </button>
+                </div>
+              )}
+
+              {error && <p className="text-red-500 text-center text-sm bg-red-50 p-2 rounded-lg">{error}</p>}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
+

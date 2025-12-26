@@ -101,13 +101,14 @@ export default function Navigation() {
               )}
             </div>
 
-            <Link href="/pricing" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">
+            <Link href="/pricing" className="hidden md:inline text-gray-600 hover:text-purple-600 font-medium transition-colors">
               Pricing
             </Link>
-            <Link href="/roadmap" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">
+            <Link href="/roadmap" className="hidden md:inline text-gray-600 hover:text-purple-600 font-medium transition-colors">
               Roadmap
             </Link>
           </div>
+
 
           <div className="flex items-center space-x-4">
             {user ? (
@@ -139,7 +140,7 @@ export default function Navigation() {
             )}
 
             <button
-              className="md:hidden p-2 text-gray-600"
+              className="hidden" // Hiding original hamburger menu completely as per plan
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X /> : <Menu />}
@@ -147,6 +148,8 @@ export default function Navigation() {
           </div>
         </div>
       </div>
+      {/* Mobile Bottom Nav is rendered in Layout or separately */}
     </nav>
   );
 }
+

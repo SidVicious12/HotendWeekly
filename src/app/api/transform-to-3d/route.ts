@@ -22,16 +22,17 @@ export async function POST(request: NextRequest) {
         // Allow unauthenticated usage for testing/demo
         userId = user?.id || 'guest_user'
 
-        const limitCheck = await checkUsageLimit(userId, 'transform-to-3d')
-        if (!limitCheck.allowed) {
-            await incrementUsage(userId, {
-                toolName: 'transform-to-3d',
-                toolCategory: 'ai_tools',
-                status: 'rate_limited',
-                processingTimeMs: Date.now() - startTime,
-            })
-            return NextResponse.json({ error: 'Usage limit exceeded' }, { status: 429 })
-        }
+        // const limitCheck = await checkUsageLimit(userId, 'transform-to-3d')
+        // if (!limitCheck.allowed) {
+        //     await incrementUsage(userId, {
+        //         toolName: 'transform-to-3d',
+        //         toolCategory: 'ai_tools',
+        //         status: 'rate_limited',
+        //         processingTimeMs: Date.now() - startTime,
+        //     })
+        //     return NextResponse.json({ error: 'Usage limit exceeded' }, { status: 429 })
+        // }
+
 
         const formData = await request.formData()
         const imageFile = formData.get('image') as File

@@ -1,9 +1,9 @@
-'use client';
-
+// ... (imports)
 import { useState } from 'react';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import { ToolStatusBadge } from '@/components/ToolStatusBadge';
+import { ChevronUp, ChevronDown, Download, Image as ImageIcon, Wand2 } from 'lucide-react';
 
 export default function PrintSceneGeneratorPage() {
     const [description, setDescription] = useState('');
@@ -11,6 +11,7 @@ export default function PrintSceneGeneratorPage() {
     const [generatedImage, setGeneratedImage] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isControlsOpen, setIsControlsOpen] = useState(true);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -30,6 +31,7 @@ export default function PrintSceneGeneratorPage() {
         }
         setIsProcessing(true);
         setError(null);
+        setIsControlsOpen(false); // Auto collapse on generate
 
         try {
             const formData = new FormData();
@@ -50,60 +52,141 @@ export default function PrintSceneGeneratorPage() {
             setGeneratedImage(data.image);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to generate');
+            setIsControlsOpen(true); // Re-open on error
         } finally {
             setIsProcessing(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
-            <Navigation />
-            <section className="pt-20 pb-12 px-6 text-center">
-                <Link href="/tools" className="text-purple-600 mb-6 inline-block">← Back to Tools</Link>
-                <div className="flex justify-center mb-4"><ToolStatusBadge status="live" /></div>
-                <h1 className="text-5xl font-bold mb-4">Print Scene <span className="text-gradient from-purple-600 to-blue-600 italic">Generator</span></h1>
-                <p className="text-xl text-gray-600 mb-8">Generate lifestyle scenes for your 3D prints.</p>
-            </section>
+        <div className="h-[100dvh] flex flex-col bg-gray-50 overflow-hidden">
+            <div className="hidden md:block">
+                <Navigation />
+            </div>
 
-            <section className="pb-20 px-6">
-                <div className="max-w-4xl mx-auto bg-white rounded-3xl p-8 shadow-2xl">
-                    <div className="space-y-6">
-                        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
-                            <label className="block font-medium mb-2">Upload your object (Optional)</label>
-                            <input type="file" onChange={handleImageUpload} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100" />
-                            {uploadedImage && <img src={uploadedImage} alt="Preview" className="mount-4 h-32 object-contain rounded-lg border mt-4" />}
+            {/* Main Viewer Area */}
+            <main className="flex-1 relative flex items-center justify-center bg-gray-100 overflow-hidden">
+                {(generatedImage || uploadedImage) ? (
+                    <img
+                        src={generatedImage || uploadedImage || ''}
+                        alt="Scene"
+                        className="max-w-full max-h-full object-contain"
+                    />
+                ) : (
+                    <div className="text-gray-400 text-center p-6">
+                        <ImageIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                        <p className="text-lg">Upload an object or describe a scene</p>
+                    </div>
+                )}
+
+                {/* Mobile Header Overlay */}
+                <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start pointer-events-none md:hidden">
+                    <div className="pointer-events-auto bg-white/80 backdrop-blur-md rounded-full px-3 py-1 text-xs font-semibold shadow-sm border border-gray-200">
+                        Scene Gen
+                    </div>
+                </div>
+            </main>
+
+            {/* Controls Sheet */}
+            <div
+                className={`
+                    bg-white shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] 
+                    transition-all duration-300 ease-in-out z-20
+                    ${isControlsOpen ? 'h-auto max-h-[60vh]' : 'h-16'}
+                    rounded-t-3xl border-t border-gray-100 flex flex-col
+                `}
+            >
+                {/* Handle / Toggle */}
+                <button
+                    onClick={() => setIsControlsOpen(!isControlsOpen)}
+                    className="w-full flex items-center justify-center h-8 hover:bg-gray-50 rounded-t-3xl shrink-0"
+                >
+                    <div className="w-12 h-1 bg-gray-300 rounded-full" />
+                </button>
+
+                <div className="p-6 pt-2 overflow-y-auto flex-1 pb-24 md:pb-6">
+                    {/* Collapsed View Summary */}
+                    {!isControlsOpen && (
+                        <div className="flex justify-between items-center -mt-2" onClick={() => setIsControlsOpen(true)}>
+                            <span className="font-semibold text-gray-900">
+                                {isProcessing ? 'Generating...' : (generatedImage ? 'Scene Ready' : 'Configure Scene')}
+                            </span>
+                            <button
+                                className="bg-purple-600 text-white p-2 rounded-full"
+                                onClick={(e) => { e.stopPropagation(); setIsControlsOpen(true); }}
+                            >
+                                <ChevronUp className="w-5 h-5" />
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Expanded Controls */}
+                    <div className={`${!isControlsOpen ? 'hidden' : 'block'} space-y-4`}>
+                        {/* File Upload */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">My Object (Optional)</label>
+                            <div className="flex items-center gap-3">
+                                <label className="flex-1 cursor-pointer bg-gray-50 border border-gray-200 text-gray-600 rounded-xl px-4 py-3 text-sm font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2">
+                                    <ImageIcon className="w-4 h-4" />
+                                    {uploadedImage ? 'Change Image' : 'Upload Image'}
+                                    <input type="file" onChange={handleImageUpload} className="hidden" accept="image/*" />
+                                </label>
+                                {uploadedImage && (
+                                    <button onClick={() => setUploadedImage(null)} className="p-3 text-gray-500 hover:text-red-500 bg-gray-50 rounded-xl border border-gray-200">
+                                        <span className="sr-only">Remove</span>
+                                        ✕
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
+                        {/* Description */}
                         <div>
-                            <label className="block font-medium mb-2">Describe the scene</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Scene Description</label>
                             <textarea
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                placeholder="A modern wooden desk with blueprints and coffee..."
-                                className="w-full p-4 rounded-xl border-gray-300 shadow-sm focus:border-purple-500 h-32"
+                                placeholder="E.g. A futuristic workshop..."
+                                className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-purple-500 transition-all text-sm h-24 resize-none"
                             />
                         </div>
 
-                        <button
-                            onClick={handleGenerate}
-                            disabled={isProcessing}
-                            className="w-full bg-purple-600 text-white py-4 rounded-xl font-bold hover:bg-purple-700 disabled:opacity-50"
-                        >
-                            {isProcessing ? 'Generating Scene...' : 'Generate Scene'}
-                        </button>
+                        {/* Actions */}
+                        <div className="flex gap-3 pt-2">
+                            <button
+                                onClick={handleGenerate}
+                                disabled={isProcessing}
+                                className="flex-1 bg-purple-600 text-white py-3.5 rounded-xl font-bold hover:bg-purple-700 disabled:opacity-70 flex items-center justify-center gap-2 shadow-lg shadow-purple-200"
+                            >
+                                {isProcessing ? (
+                                    <>
+                                        <div className="animate-spin w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
+                                        Creating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Wand2 className="w-5 h-5" />
+                                        Generate Scene
+                                    </>
+                                )}
+                            </button>
 
-                        {error && <p className="text-red-500 text-center">{error}</p>}
+                            {generatedImage && (
+                                <a
+                                    href={generatedImage}
+                                    download="scene.png"
+                                    className="bg-gray-900 text-white p-3.5 rounded-xl hover:bg-gray-800 flex items-center justify-center"
+                                >
+                                    <Download className="w-5 h-5" />
+                                </a>
+                            )}
+                        </div>
 
-                        {generatedImage && (
-                            <div className="mt-8">
-                                <h3 className="font-bold mb-4">Generated Scene</h3>
-                                <img src={generatedImage} alt="Generated" className="w-full rounded-2xl shadow-lg" />
-                                <a href={generatedImage} download="scene.png" className="block text-center mt-4 text-purple-600 font-semibold">Download Image</a>
-                            </div>
-                        )}
+                        {error && <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded-lg">{error}</p>}
                     </div>
                 </div>
-            </section>
+            </div>
         </div>
     );
 }
+
