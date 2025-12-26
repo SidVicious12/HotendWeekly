@@ -8,15 +8,26 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+let supabase: ReturnType<typeof createClient> | null = null;
+
+if (supabaseUrl && supabaseKey) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+  } catch (e) {
+    console.warn('Failed to initialize usage-tracker Supabase client:', e);
+  }
+} else {
+  console.warn('Missing Supabase credentials in usage-tracker. Usage tracking will be disabled.');
+}
 
 /**
  * Usage limit check result
@@ -51,6 +62,8 @@ export async function checkUsageLimit(
   toolName: string
 ): Promise<UsageLimitResult> {
   try {
+    if (!supabase) return { allowed: true };
+
     const { data, error } = await supabase.rpc('check_usage_limit', {
       p_user_id: userId,
       p_tool_name: toolName,
@@ -77,6 +90,8 @@ export async function incrementUsage(
   metadata: ToolUsageMetadata
 ): Promise<void> {
   try {
+    if (!supabase) return;
+
     const {
       toolName,
       toolCategory = 'ai_tools',
@@ -123,6 +138,8 @@ export async function incrementUsage(
  */
 export async function getUserUsageStats(userId: string) {
   try {
+    if (!supabase) return null;
+
     const { data, error } = await supabase
       .from('user_subscription_details')
       .select('*')
@@ -164,6 +181,8 @@ export async function getUserUsageHistory(
   }
 ) {
   try {
+    if (!supabase) return [];
+
     let query = supabase
       .from('tool_usage')
       .select('*')
@@ -209,6 +228,8 @@ export async function getUserUsageHistory(
  */
 export async function resetDailyQuotas(): Promise<void> {
   try {
+    if (!supabase) return;
+
     const { error } = await supabase
       .from('usage_quotas')
       .update({
@@ -232,6 +253,8 @@ export async function resetDailyQuotas(): Promise<void> {
  */
 export async function resetMonthlyQuotas(): Promise<void> {
   try {
+    if (!supabase) return;
+
     const { error } = await supabase
       .from('usage_quotas')
       .update({

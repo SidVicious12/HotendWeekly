@@ -6,6 +6,13 @@ import Footer from '@/components/Footer';
 
 const tools = [
   {
+    name: 'Transform to 3D',
+    href: '/tools/transform-to-3d',
+    image: '/showcase/transform-to-3d.jpeg',
+    description: 'Turn 2D images into 3D models with AI.',
+    status: 'beta'
+  },
+  {
     name: 'Magic Eraser',
     href: '/tools/magic-eraser',
     image: '/showcase/magic-eraser.png',

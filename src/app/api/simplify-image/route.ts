@@ -4,6 +4,8 @@ import { cookies } from 'next/headers'
 import OpenAI from 'openai'
 import { checkUsageLimit, incrementUsage } from '@/lib/usage-tracker'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
   let userId: string | null = null
@@ -16,7 +18,7 @@ export async function POST(request: NextRequest) {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser()
-    
+
     userId = user?.id || null
 
     if (authError || !user) {

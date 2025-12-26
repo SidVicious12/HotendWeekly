@@ -1,200 +1,368 @@
 'use client';
 
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
+import { convertGLBtoSTL, downloadBlob } from '@/lib/stl-exporter';
+
+// Type for model-viewer web component
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'model-viewer': any;
+    }
+  }
+}
+
+// Type for saved model in gallery
+interface SavedModel {
+  id: string;
+  thumbnailUrl: string;
+  modelUrl: string;
+  createdAt: number;
+}
 
 export default function TransformTo3DPage() {
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [modelUrl, setModelUrl] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [loadingStage, setLoadingStage] = useState('');
+  const [credits] = useState(50); // Display only for now
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [isExportingSTL, setIsExportingSTL] = useState(false);
+  const [savedModels, setSavedModels] = useState<SavedModel[]>([]);
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
+
+  // Load model-viewer script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js';
+    document.head.appendChild(script);
+  }, []);
+
+  // Load saved models from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('hotend_3d_models');
+    if (saved) {
+      try {
+        setSavedModels(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to load saved models:', e);
+      }
+    }
+  }, []);
+
+  // Save model to gallery
+  const saveModelToGallery = useCallback((thumbUrl: string, modelUrl: string) => {
+    const newModel: SavedModel = {
+      id: Date.now().toString(),
+      thumbnailUrl: thumbUrl,
+      modelUrl,
+      createdAt: Date.now(),
+    };
+    const updated = [newModel, ...savedModels].slice(0, 10); // Keep last 10
+    setSavedModels(updated);
+    localStorage.setItem('hotend_3d_models', JSON.stringify(updated));
+  }, [savedModels]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      setUploadedImage(result);
+      setModelUrl(null);
+      setError(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleGenerate = async () => {
+    if (!uploadedImage) return;
+    setIsProcessing(true);
+    setError(null);
+    setUploadProgress(10);
+    setLoadingStage('Preparing image...');
+
+    try {
+      const response = await fetch(uploadedImage);
+      const blob = await response.blob();
+      const imageFile = new File([blob], 'image.png', { type: 'image/png' });
+      const formData = new FormData();
+      formData.append('image', imageFile);
+
+      setUploadProgress(20);
+      setLoadingStage('Uploading to AI...');
+
+      const apiResponse = await fetch('/api/transform-to-3d', {
+        method: 'POST',
+        body: formData,
+      });
+
+      setUploadProgress(40);
+      setLoadingStage('Reconstructing 3D geometry...');
+
+      // Simulate progress while waiting for response
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => Math.min(prev + 5, 90));
+      }, 2000);
+
+      const data = await apiResponse.json();
+      clearInterval(progressInterval);
+
+      if (!apiResponse.ok) throw new Error(data.error || 'Generation failed');
+      if (!data.modelUrl) throw new Error('No model URL returned');
+
+      setUploadProgress(95);
+      setLoadingStage('Finalizing model...');
+
+      setModelUrl(data.modelUrl);
+      setSelectedModel(data.modelUrl);
+      setUploadProgress(100);
+      setLoadingStage('Complete!');
+
+      // Save to gallery
+      if (uploadedImage) {
+        saveModelToGallery(uploadedImage, data.modelUrl);
+      }
+    } catch (err) {
+      console.error('Generation error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate 3D model');
+    } finally {
+      setIsProcessing(false);
+      setUploadProgress(0);
+      setLoadingStage('');
+    }
+  };
+
+  const handleDownloadGLB = () => {
+    const url = selectedModel || modelUrl;
+    if (!url) return;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `hotend-3d-model-${Date.now()}.glb`;
+    link.click();
+    setShowExportMenu(false);
+  };
+
+  const handleDownloadSTL = async () => {
+    const url = selectedModel || modelUrl;
+    if (!url) return;
+    setIsExportingSTL(true);
+    try {
+      const stlBlob = await convertGLBtoSTL(url);
+      downloadBlob(stlBlob, `hotend-3d-model-${Date.now()}.stl`);
+    } catch (err) {
+      console.error('STL export error:', err);
+      setError('Failed to export STL. Try downloading GLB instead.');
+    } finally {
+      setIsExportingSTL(false);
+      setShowExportMenu(false);
+    }
+  };
+
+  const activeModelUrl = selectedModel || modelUrl;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
-      {/* Navigation */}
-      <Navigation />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
+      {/* MakerWorld-style Header */}
+      <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+        <div className="flex items-center gap-4">
+          <Link href="/tools" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Image to 3D Model
+          </Link>
+        </div>
 
-      {/* Header/Hero Section */}
-      <section className="pt-20 pb-16 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <Link href="/" className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 mb-6">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        <div className="flex items-center gap-4">
+          {/* Credits Display */}
+          <div className="flex items-center gap-2 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-full px-4 py-1.5">
+            <span className="text-amber-600">🪙</span>
+            <span className="font-semibold text-amber-700">Credit: {credits}</span>
+          </div>
+
+          {/* Export Button */}
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              disabled={!activeModelUrl}
+              className={`px-5 py-2 rounded-lg font-bold flex items-center gap-2 transition-all ${activeModelUrl
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:shadow-emerald-500/30'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+            >
+              Export
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
-              Back to Home
-            </Link>
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
-              Transform{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 italic">
-                2D to 3D
-              </span>
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto">
-              Transform 2D product images into interactive 3D models with AI-powered depth reconstruction.
-            </p>
+            </button>
+
+            {showExportMenu && activeModelUrl && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+                <button
+                  onClick={handleDownloadGLB}
+                  className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3"
+                >
+                  <span className="text-2xl">📦</span>
+                  <div>
+                    <div className="font-medium">Download GLB</div>
+                    <div className="text-xs text-gray-500">3D viewer compatible</div>
+                  </div>
+                </button>
+                <button
+                  onClick={handleDownloadSTL}
+                  disabled={isExportingSTL}
+                  className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3"
+                >
+                  <span className="text-2xl">🖨️</span>
+                  <div>
+                    <div className="font-medium">
+                      {isExportingSTL ? 'Converting...' : 'Download STL'}
+                    </div>
+                    <div className="text-xs text-gray-500">3D print ready</div>
+                  </div>
+                </button>
+              </div>
+            )}
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* Main Visual Section */}
-      <section className="pb-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-white rounded-3xl p-12 shadow-2xl">
-            <img
-              src="/showcase/transform-to-3d.jpeg"
-              alt="Transform to 3D AI Technology"
-              className="w-full h-auto rounded-2xl"
+      {/* Main Content - Full Screen 3D Viewer */}
+      <div className="flex-1 flex">
+        {/* Left Sidebar - Upload */}
+        <aside className="w-80 bg-white border-r border-gray-200 p-4 flex flex-col">
+          <h3 className="font-bold text-gray-800 mb-4">Source Image</h3>
+
+          {/* Upload Area */}
+          <div className="bg-gray-50 rounded-xl p-2 mb-4">
+            {!uploadedImage ? (
+              <label className="cursor-pointer block">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 hover:border-purple-400 hover:bg-purple-50/50 transition-all text-center">
+                  <div className="w-12 h-12 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-3 text-purple-500">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">Upload Image</span>
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                </div>
+              </label>
+            ) : (
+              <div className="relative group">
+                <img src={uploadedImage} alt="Source" className="rounded-lg w-full h-auto max-h-48 object-contain bg-white" />
+                <button
+                  onClick={() => { setUploadedImage(null); setModelUrl(null); setSelectedModel(null); }}
+                  className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Generate Button */}
+          {uploadedImage && (
+            <button
+              onClick={handleGenerate}
+              disabled={isProcessing}
+              className={`w-full py-3 rounded-xl font-bold text-white transition-all ${isProcessing
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:shadow-lg hover:shadow-purple-500/30'
+                }`}
+            >
+              {isProcessing ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  {loadingStage || 'Processing...'} ({uploadProgress}%)
+                </span>
+              ) : '✨ Generate 3D Model'}
+            </button>
+          )}
+
+          {/* Error */}
+          {error && (
+            <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
+          {/* Model Gallery */}
+          <div className="mt-auto pt-4 border-t border-gray-200">
+            <h4 className="font-bold text-gray-800 mb-3 flex items-center justify-between">
+              <span>Recent Models</span>
+              <span className="text-xs text-gray-500">{savedModels.length}/10</span>
+            </h4>
+            <div className="grid grid-cols-3 gap-2">
+              {savedModels.slice(0, 6).map((model) => (
+                <button
+                  key={model.id}
+                  onClick={() => setSelectedModel(model.modelUrl)}
+                  className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedModel === model.modelUrl ? 'border-purple-500 ring-2 ring-purple-200' : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                >
+                  <img src={model.thumbnailUrl} alt="Model" className="w-full h-full object-cover" />
+                </button>
+              ))}
+              {savedModels.length === 0 && (
+                <div className="col-span-3 text-center text-gray-400 text-sm py-4">
+                  No models yet
+                </div>
+              )}
+            </div>
+          </div>
+        </aside>
+
+        {/* 3D Viewer - Full Screen */}
+        <main className="flex-1 bg-gradient-to-br from-gray-100 to-gray-200 relative">
+          {activeModelUrl ? (
+            <model-viewer
+              src={activeModelUrl}
+              alt="3D model"
+              auto-rotate
+              camera-controls
+              ar
+              shadow-intensity="1"
+              environment-image="neutral"
+              style={{ width: '100%', height: '100%' }}
             />
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="pb-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
-            Advanced{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 italic">
-              3D Features
-            </span>
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg">
-              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Depth Reconstruction</h3>
-              <p className="text-gray-600">
-                AI analyzes your 2D image and automatically generates accurate depth maps for realistic 3D models.
-              </p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg">
-              <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-blue-500 rounded-2xl flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Interactive Models</h3>
-              <p className="text-gray-600">
-                Create fully interactive 3D models that customers can rotate, zoom, and explore from every angle.
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Lightning Fast</h3>
-              <p className="text-gray-600">
-                Generate high-quality 3D models in seconds, not hours. Perfect for e-commerce at scale.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Use Cases Section */}
-      <section className="pb-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-white rounded-3xl p-12 shadow-xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
-              Perfect{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 italic">
-                For
-              </span>
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Use Case 1 */}
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+              {isProcessing ? (
+                <div className="text-center">
+                  <div className="w-20 h-20 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                  <p className="text-purple-600 font-medium text-lg">Reconstructing Geometry...</p>
+                  <p className="text-sm mt-2">This usually takes 30-60 seconds</p>
+                </div>
+              ) : (
+                <>
+                  <svg className="w-24 h-24 opacity-30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
                   </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">E-Commerce Stores</h3>
-                  <p className="text-gray-600">
-                    Give customers an immersive shopping experience with 360° product views.
-                  </p>
-                </div>
-              </div>
-
-              {/* Use Case 2 */}
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Product Catalogs</h3>
-                  <p className="text-gray-600">
-                    Enhance your digital catalogs with interactive 3D product visualizations.
-                  </p>
-                </div>
-              </div>
-
-              {/* Use Case 3 */}
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">AR Experiences</h3>
-                  <p className="text-gray-600">
-                    Export 3D models for augmented reality try-on experiences on mobile devices.
-                  </p>
-                </div>
-              </div>
-
-              {/* Use Case 4 */}
-              <div className="flex gap-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Social Media</h3>
-                  <p className="text-gray-600">
-                    Create engaging 3D content that stands out on Instagram, TikTok, and Facebook.
-                  </p>
-                </div>
-              </div>
+                  <p className="text-lg font-medium">Upload an image to generate 3D</p>
+                  <p className="text-sm mt-1">Your model will appear here</p>
+                </>
+              )}
             </div>
-          </div>
-        </div>
-      </section>
+          )}
+        </main>
+      </div>
 
-      {/* CTA Section */}
-      <section className="pb-20 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl p-12 text-center shadow-2xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Ready to Go 3D?
-            </h2>
-            <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
-              Transform your product photography with AI-powered 3D modeling. No technical skills required.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-gray-900 px-8 py-4 rounded-2xl font-semibold hover:bg-gray-100 transition-colors text-lg">
-                Try It Free
-              </button>
-              <Link href="/pricing" className="bg-gray-800 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-gray-700 transition-colors text-lg border border-gray-700">
-                View Pricing
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hide default navigation on this page for cleaner MakerWorld look */}
+      <style jsx global>{`
+        nav.fixed { display: none !important; }
+      `}</style>
     </div>
   );
 }

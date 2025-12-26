@@ -4,6 +4,8 @@ import { cookies } from 'next/headers'
 import Replicate from 'replicate'
 import { checkUsageLimit, incrementUsage } from '@/lib/usage-tracker'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
     const startTime = Date.now()
     let userId: string | null = null

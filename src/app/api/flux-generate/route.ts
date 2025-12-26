@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser()
-    
+
     userId = user?.id || null
 
     if (authError || !user) {

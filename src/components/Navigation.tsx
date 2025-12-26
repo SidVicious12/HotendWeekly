@@ -13,24 +13,46 @@ export default function Navigation() {
 
   const tools = [
     {
-      name: 'Fashion Models',
-      href: '/tools/fashion-model-database',
-      description: 'Diverse AI fashion models for your prints'
+      name: 'Image to 3D',
+      href: '/tools/transform-to-3d',
+      description: 'Turn 2D images into 3D models',
+      icon: '✨'
     },
     {
-      name: 'Transform to 3D',
-      href: '/tools/transform-to-3d',
-      description: 'Turn 2D images into 3D models'
+      name: 'Layer Detail Enhancer',
+      href: '/tools/layer-detail-enhancer',
+      description: 'Smooth 3D print lines',
+      icon: '📏'
     },
     {
       name: 'Magic Eraser',
       href: '/tools/magic-eraser',
-      description: 'Remove supports and artifacts'
+      description: 'Remove unwanted objects',
+      icon: '🪄'
     },
     {
       name: 'Image Enhancer',
       href: '/tools/image-enhancer',
-      description: 'Upscale and improve print photos'
+      description: 'Upscale & improve quality',
+      icon: '⚡'
+    },
+    {
+      name: 'Color Changer',
+      href: '/tools/color-changer',
+      description: 'Recolor objects instantly',
+      icon: '🎨'
+    },
+    {
+      name: 'Print Scene Generator',
+      href: '/tools/print-scene-generator',
+      description: 'Generate lifestyle scenes',
+      icon: '🎬'
+    },
+    {
+      name: 'Texture Preview',
+      href: '/tools/texture-preview',
+      description: 'Visualize materials',
+      icon: '🔍'
     }
   ];
 
@@ -57,16 +79,21 @@ export default function Navigation() {
               </button>
 
               {showToolsDropdown && (
-                <div className="absolute left-1/2 -translate-x-1/2 top-full pt-4 w-[600px]">
-                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-2 grid grid-cols-2 gap-2">
+                <div className="absolute left-1/2 -translate-x-1/2 top-full pt-4 w-[800px]">
+                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 grid grid-cols-2 gap-2">
                     {tools.map((tool) => (
                       <Link
                         key={tool.href}
                         href={tool.href}
-                        className="block p-4 rounded-xl hover:bg-gray-50 transition-all"
+                        className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all group/item"
                       >
-                        <div className="font-semibold text-gray-900 mb-1">{tool.name}</div>
-                        <div className="text-sm text-gray-500">{tool.description}</div>
+                        <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center text-xl group-hover/item:bg-purple-100 transition-colors">
+                          {tool.icon}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-gray-900 mb-1 group-hover/item:text-purple-600 transition-colors">{tool.name}</div>
+                          <div className="text-sm text-gray-500">{tool.description}</div>
+                        </div>
                       </Link>
                     ))}
                   </div>
@@ -74,8 +101,11 @@ export default function Navigation() {
               )}
             </div>
 
-            <Link href="/pricing" className="text-gray-600 hover:text-black text-sm font-medium transition-colors">
+            <Link href="/pricing" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">
               Pricing
+            </Link>
+            <Link href="/roadmap" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">
+              Roadmap
             </Link>
           </div>
 

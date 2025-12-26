@@ -1,17 +1,34 @@
 import Link from 'next/link'
 
-const tools = [
+interface Tool {
+  href: string
+  title: string
+  description: string
+  image: string
+  status?: 'new' | 'beta' | 'popular' | 'updated'
+}
+
+const tools: Tool[] = [
+  {
+    href: '/tools/transform-to-3d',
+    title: 'Image to 3D',
+    description: 'Turn 2D images into 3D models with AI.',
+    image: '/showcase/transform-to-3d.jpeg',
+    status: 'new'
+  },
   {
     href: '/tools/layer-detail-enhancer',
     title: 'Layer Detail Enhancer',
     description: 'Smooth 3D print layer lines while preserving details.',
-    image: '/showcase/layer-detail-enhancer.png'
+    image: '/showcase/layer-detail-enhancer.png',
+    status: 'popular'
   },
   {
     href: '/tools/magic-eraser',
     title: 'Magic Eraser',
     description: 'Remove unwanted objects or blemishes from your photos.',
-    image: '/showcase/magic-eraser.png'
+    image: '/showcase/magic-eraser.png',
+    status: 'popular'
   },
   {
     href: '/tools/image-enhancer',
@@ -23,13 +40,15 @@ const tools = [
     href: '/tools/color-changer',
     title: 'Color Changer',
     description: 'Change the color of objects or backgrounds instantly.',
-    image: '/showcase/color-changer.png'
+    image: '/showcase/color-changer.png',
+    status: 'updated'
   },
   {
     href: '/tools/print-scene-generator',
     title: 'Print Scene Generator',
     description: 'Generate realistic lifestyle scenes for your 3D prints.',
-    image: '/showcase/print-scene-generator.png'
+    image: '/showcase/print-scene-generator.png',
+    status: 'beta'
   },
   {
     href: '/tools/texture-preview',
@@ -85,19 +104,29 @@ export function ToolkitSection() {
   )
 }
 
-interface ToolCardProps {
-  href: string
-  title: string
-  description: string
-  image: string
-}
+function ToolCard({ href, title, description, image, status }: Tool) {
+  const getStatusColor = (s?: string) => {
+    switch (s) {
+      case 'new': return 'bg-blue-500 text-white'
+      case 'beta': return 'bg-purple-500 text-white'
+      case 'popular': return 'bg-amber-500 text-white'
+      case 'updated': return 'bg-green-500 text-white'
+      default: return null
+    }
+  }
 
-function ToolCard({ href, title, description, image }: ToolCardProps) {
+  const statusColor = getStatusColor(status)
+
   return (
     <Link
       href={href}
-      className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow cursor-pointer group"
+      className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow cursor-pointer group relative overflow-hidden"
     >
+      {status && statusColor && (
+        <div className={`absolute top-4 right-4 px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full ${statusColor}`}>
+          {status}
+        </div>
+      )}
       <div className="bg-gray-100 rounded-2xl p-6 mb-6 aspect-square flex items-center justify-center group-hover:bg-gray-200 transition-colors">
         <img
           src={image}
